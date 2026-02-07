@@ -19,7 +19,7 @@ const onboardingData = [
     mean: "Demi masa. Sesungguhnya manusia itu benar-benar dalam kerugian.",
     introTitle: "Apa itu ARAH?",
     introDesc:
-      "ARAH adalah pendamping digital minimalis yang dirancang untuk membantu Anda menavigasi waktu ibadah dengan lebih bermakna di tengah kesibukan modern.",
+      "ARAH adalah pendamping digital minimalis yang dirancang untuk membantu Anda menavigasi waktu ibadah dengan lebih bermakna.",
     icon: <Clock className="w-12 h-12 md:w-16 md:h-16 text-[#5465ff]" />,
     color: "bg-blue-50/50",
   },
@@ -30,7 +30,7 @@ const onboardingData = [
     mean: "Barangsiapa menempuh jalan mencari ilmu, Allah mudahkan jalannya ke surga.",
     introTitle: "Perpustakaan Digital",
     introDesc:
-      "Eksplorasi ribuan Hadis dan ayat suci Al-Qur'an secara instan. ARAH diperuntukkan bagi Anda yang ingin memperdalam literasi Islam setiap hari.",
+      "Eksplorasi ribuan Hadis dan ayat suci Al-Qur'an secara instan untuk memperdalam literasi Islam Anda.",
     icon: <BookOpen className="w-12 h-12 md:w-16 md:h-16 text-emerald-500" />,
     color: "bg-emerald-50/50",
   },
@@ -40,7 +40,7 @@ const onboardingData = [
     mean: "Sesungguhnya shalat itu adalah kewajiban yang ditentukan waktunya.",
     introTitle: "Presisi & Akurasi",
     introDesc:
-      "Melalui integrasi data astronomi yang akurat, ARAH memastikan Anda tetap terhubung dengan waktu Shalat dan Adzan di mana pun Anda berada.",
+      "Melalui integrasi data astronomi, ARAH memastikan Anda tetap terhubung dengan waktu Shalat & Adzan.",
     icon: <Wind className="w-12 h-12 md:w-16 md:h-16 text-rose-500" />,
     color: "bg-rose-50/50",
   },
@@ -54,12 +54,9 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   const [current, setCurrent] = useState(0);
   const [showLocationModal, setShowLocationModal] = useState(false);
 
-  // Helper to ensure onComplete is actually a function before calling
   const safeComplete = () => {
     if (typeof onComplete === "function") {
       onComplete();
-    } else {
-      console.error("onComplete prop is missing or not a function");
     }
   };
 
@@ -84,7 +81,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
           );
           safeComplete();
         },
-        () => safeComplete(), // Proceed even if denied
+        () => safeComplete(),
       );
     } else {
       safeComplete();
@@ -93,111 +90,109 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
 
   return (
     <div className="fixed inset-0 z-[999] bg-[#FAFAFA] flex flex-col items-center justify-center overflow-hidden font-sans">
-      {/* --- PARALLAX BACKGROUND ELEMENTS --- */}
+      {/* --- BACKGROUND ANIMATION --- */}
       <div className="absolute inset-0 pointer-events-none">
         <motion.div
           animate={{ rotate: 360, scale: [1, 1.1, 1] }}
           transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-20 -right-20 w-64 h-64 md:w-96 md:h-96 bg-[#5465ff]/5 rounded-full blur-3xl"
+          className="absolute -top-20 -right-20 w-96 h-96 bg-[#5465ff]/10 rounded-full blur-3xl"
         />
         <motion.div
           animate={{ y: [0, 50, 0] }}
           transition={{ duration: 12, repeat: Infinity }}
-          className="absolute bottom-10 left-10 w-48 h-48 md:w-72 md:h-72 bg-amber-100/30 rounded-full blur-3xl"
+          className="absolute bottom-10 left-10 w-72 h-72 bg-amber-100/40 rounded-full blur-3xl"
         />
       </div>
 
       <AnimatePresence mode="wait">
         {!showLocationModal ? (
           <motion.div
-            key="content"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            key={`step-${current}`}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
             className="relative z-10 w-full max-w-xl px-6 h-full flex flex-col items-center justify-center py-10"
           >
-            {/* Scrollable Content Area */}
-            <div className="flex-1 w-full flex flex-col items-center justify-center overflow-y-auto no-scrollbar pt-10">
-              {/* Dynamic Animated Icon */}
+            {/* Scrollable Content */}
+            <div className="flex-1 w-full flex flex-col items-center justify-center pt-10">
               <motion.div
-                key={`icon-${current}`}
-                initial={{ scale: 0, rotate: -45 }}
+                initial={{ scale: 0.8, rotate: -10 }}
                 animate={{ scale: 1, rotate: 0 }}
                 className={cn(
-                  "p-6 md:p-7 rounded-[2rem] md:rounded-[2.5rem] mb-6 shadow-inner shrink-0",
+                  "p-8 rounded-[2.5rem] mb-8 shadow-inner shrink-0 flex items-center justify-center",
                   onboardingData[current].color,
                 )}
               >
                 {onboardingData[current].icon}
               </motion.div>
 
-              <div className="space-y-4 md:space-y-6 flex flex-col items-center w-full">
-                {/* Spiritual Section (Dalil) */}
-                <div className="space-y-3 md:space-y-4 w-full">
-                  <h2 className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.4em] text-[#5465ff] text-center">
+              <div className="space-y-6 flex flex-col items-center w-full">
+                <div className="space-y-4 w-full text-center">
+                  <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#5465ff]">
                     {onboardingData[current].title}
                   </h2>
-                  <motion.h1
-                    key={`dalil-${current}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-2xl md:text-5xl font-serif leading-relaxed text-slate-800 text-center px-2"
+                  <h1
+                    className="text-3xl md:text-5xl font-serif leading-relaxed text-slate-800"
                     style={{ direction: "rtl" }}
                   >
                     {onboardingData[current].dalil}
-                  </motion.h1>
-                  <p className="text-[10px] md:text-[11px] italic text-slate-400 max-w-[280px] md:max-w-sm mx-auto leading-relaxed text-center">
+                  </h1>
+                  <p className="text-xs italic text-slate-400 max-w-sm mx-auto leading-relaxed px-4">
                     "{onboardingData[current].mean}"
                   </p>
                 </div>
 
-                {/* --- APP INTRODUCTION CARD --- */}
                 <motion.div
-                  key={`intro-${current}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="mt-2 md:mt-4 p-5 md:p-6 bg-white border border-slate-100 rounded-[2rem] shadow-sm w-full max-w-[340px] md:max-w-md relative"
+                  transition={{ delay: 0.2 }}
+                  className="p-6 bg-white border border-slate-100 rounded-[2rem] shadow-sm w-full max-w-md relative"
                 >
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#5465ff] text-white px-3 py-1 rounded-full text-[7px] md:text-[8px] font-bold uppercase tracking-widest flex items-center gap-1 whitespace-nowrap">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#5465ff] text-white px-4 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest flex items-center gap-1">
                     <Sparkles className="w-2 h-2 fill-white" /> Mengenal ARAH
                   </div>
-                  <h4 className="text-xs md:text-sm font-bold text-slate-800 mb-1 md:mb-2">
+                  <h4 className="text-sm font-bold text-slate-800 mb-2">
                     {onboardingData[current].introTitle}
                   </h4>
-                  <p className="text-[11px] md:text-sm text-slate-500 leading-relaxed font-medium">
+                  <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium">
                     {onboardingData[current].introDesc}
                   </p>
                 </motion.div>
               </div>
             </div>
 
-            {/* Pagination & CTA Area */}
-            <div className="w-full max-w-xs space-y-4 md:space-y-6 mt-6 pb-4">
+            {/* --- CONTROLS Area --- */}
+            <div className="w-full max-w-xs space-y-6 mt-8 pb-10">
               <div className="flex justify-center gap-2">
                 {onboardingData.map((_, i) => (
-                  <div
+                  <motion.div
                     key={i}
+                    animate={{ width: i === current ? 32 : 8 }}
                     className={cn(
-                      "h-1 rounded-full transition-all duration-500",
-                      i === current ? "w-8 bg-[#5465ff]" : "w-2 bg-slate-200",
+                      "h-1.5 rounded-full transition-colors duration-300",
+                      i === current ? "bg-[#5465ff]" : "bg-slate-200",
                     )}
                   />
                 ))}
               </div>
+
               <div className="flex flex-col gap-3">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={handleNext}
-                  className="w-full py-4 bg-slate-900 text-white rounded-2xl text-xs md:text-sm font-bold flex items-center justify-center gap-2 hover:bg-[#5465ff] transition-all shadow-lg shadow-slate-200 active:scale-95"
+                  className="w-full py-5 bg-[#5465ff] text-white rounded-full text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-[#5465ff]/30 cursor-pointer active:brightness-90 transition-all"
                 >
                   {current === onboardingData.length - 1
                     ? "Buka Pintu Hikmah"
                     : "Lanjutkan"}
                   <ArrowRight className="w-4 h-4" />
-                </button>
+                </motion.button>
+
                 <button
                   onClick={() => setShowLocationModal(true)}
-                  className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-[#5465ff] transition-colors py-2"
+                  className="text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-[#5465ff] transition-colors py-2 cursor-pointer"
                 >
                   Lewati Perkenalan
                 </button>
@@ -207,39 +202,45 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
         ) : (
           /* --- LOCATION MODAL --- */
           <motion.div
-            key="location"
+            key="location-modal"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="relative z-10 w-full max-w-xs md:max-w-sm px-6"
+            className="relative z-20 w-full max-w-xs md:max-w-sm px-6"
           >
-            <div className="bg-white p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] shadow-2xl text-center border border-slate-50 space-y-6">
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-blue-50 rounded-[1.5rem] md:rounded-3xl flex items-center justify-center mx-auto">
+            <div className="bg-white p-10 rounded-[3rem] shadow-2xl text-center border border-slate-50 space-y-8">
+              <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto">
                 <motion.div
-                  animate={{ y: [0, -5, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
                 >
-                  <MapPin className="w-8 h-8 md:w-10 md:h-10 text-[#5465ff]" />
+                  <MapPin className="w-10 h-10 text-[#5465ff]" />
                 </motion.div>
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl md:text-2xl font-bold text-slate-900 leading-tight">
+                <h3 className="text-2xl font-bold text-slate-900">
                   Aktifkan Presisi
                 </h3>
-                <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium">
-                  Izinkan lokasi untuk sinkronisasi waktu sholat dan arah kiblat
-                  yang akurat sesuai titik koordinat Anda.
+                <p className="text-sm text-slate-500 leading-relaxed font-medium">
+                  Izinkan lokasi untuk sinkronisasi waktu sholat yang akurat di
+                  posisi Anda saat ini.
                 </p>
               </div>
-              <div className="space-y-3 pt-2">
-                <button
+              <div className="space-y-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={requestLocation}
-                  className="w-full py-4 bg-[#5465ff] text-white rounded-2xl text-xs md:text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-100 active:scale-95 transition-transform"
+                  className="w-full py-5 bg-[#5465ff] text-white rounded-2xl text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-200 cursor-pointer"
                 >
                   <MousePointer2 className="w-4 h-4" /> Izinkan Sekarang
-                </button>
+                </motion.button>
                 <button
                   onClick={safeComplete}
-                  className="w-full py-4 bg-slate-50 text-slate-400 rounded-2xl text-xs md:text-sm font-bold hover:bg-slate-100"
+                  className="w-full py-5 bg-slate-50 text-slate-400 rounded-2xl text-xs font-bold hover:bg-slate-100 transition-colors cursor-pointer"
                 >
                   Gunakan Manual
                 </button>

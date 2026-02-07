@@ -90,7 +90,6 @@ export default function DzikirPage() {
                 Dzikir<span className="text-[#5465ff]">.</span>
               </h1>
               <p className="text-gray-500 font-medium mt-2 flex items-center gap-2">
-                <Heart className="w-4 h-4 text-rose-400 fill-rose-400" />
                 Untaian doa penyejuk hati sesuai tuntunan sunnah.
               </p>
             </div>

@@ -210,7 +210,7 @@ export default function JadwalSholatBulanan() {
                     </p>
                   </div>
                   <Link
-                    href="/kiblat"
+                    href="/arah-kiblat"
                     className="flex items-center justify-center gap-2 w-full py-3.5 bg-white rounded-2xl text-[#5465ff] font-bold text-sm shadow-lg active:scale-95 transition-all"
                   >
                     Buka Kompas <Compass className="w-4 h-4" />
