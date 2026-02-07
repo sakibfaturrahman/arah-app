@@ -9,6 +9,10 @@ import {
   BookOpen,
   Users2,
   Sparkles,
+  Star,
+  Heart,
+  Moon,
+  Library,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -22,7 +26,6 @@ export default function QuranIndex() {
   const [lastReadId, setLastReadId] = useState<number | null>(null);
   const pathname = usePathname();
 
-  // 🔹 Ambil data terakhir dibaca
   const fetchLastReadId = () => {
     const stored = localStorage.getItem("lastReadSurah");
     if (stored) {
@@ -54,7 +57,6 @@ export default function QuranIndex() {
     };
   }, []);
 
-  // 🔥 SIMPAN SAAT SURAH DIBUKA
   const handleReadSurah = (surah: any) => {
     const payload = {
       id: surah.nomor,
@@ -63,8 +65,6 @@ export default function QuranIndex() {
     };
 
     localStorage.setItem("lastReadSurah", JSON.stringify(payload));
-
-    // Trigger realtime update (tab yang sama)
     window.dispatchEvent(new Event("lastReadUpdated"));
   };
 
@@ -75,15 +75,19 @@ export default function QuranIndex() {
   return (
     <div className="min-h-screen bg-[#fafafa] pb-32 pt-28">
       <div className="max-w-5xl mx-auto px-4">
-        {/* HEADER */}
+        {/* HEADER - Teks lebih hangat & Ikon Dekoratif */}
         <div className="mb-10 space-y-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
+            <div className="relative">
+              <div className="absolute -top-6 -left-2 opacity-10 rotate-12">
+                <Moon className="w-12 h-12 text-[#5465ff]" />
+              </div>
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tighter">
-                Al-Qur'an<span className="text-[#5465ff]">.</span>
+                Kalam Allah<span className="text-[#5465ff]">.</span>
               </h1>
-              <p className="text-gray-500 font-medium mt-2">
-                Baca dan pelajari firman Allah setiap hari.
+              <p className="text-gray-500 font-medium mt-2 flex items-center gap-2">
+                <Heart className="w-4 h-4 text-rose-400 fill-rose-400" />
+                Tenangkan hati dengan setiap ayat yang Anda baca hari ini.
               </p>
             </div>
 
@@ -93,38 +97,38 @@ export default function QuranIndex() {
               </div>
               <input
                 type="text"
-                placeholder="Cari Surah..."
-                className="w-full md:w-80 pl-12 pr-6 py-4 bg-white rounded-[1.5rem] border border-transparent shadow-sm focus:border-[#5465ff] focus:ring-1 focus:ring-[#5465ff] outline-none transition-all"
+                placeholder="Cari cahaya dalam surah..."
+                className="w-full md:w-80 pl-12 pr-6 py-4 bg-white rounded-[1.5rem] border border-transparent shadow-sm focus:border-[#5465ff] focus:ring-1 focus:ring-[#5465ff] outline-none transition-all font-medium"
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
           </div>
 
-          {/* NAV */}
+          {/* NAV - Label lebih deskriptif */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
             <Link href="/al-quran">
               <div
                 className={cn(
                   "px-5 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 border transition-all",
                   pathname === "/al-quran"
-                    ? "bg-[#5465ff] text-white border-[#5465ff] shadow-md"
+                    ? "bg-[#5465ff] text-white border-[#5465ff] shadow-lg shadow-[#5465ff]/20"
                     : "bg-white text-gray-400 border-gray-100 hover:border-gray-200",
                 )}
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                Al-Qur'an
+                Al Qur'an
               </div>
             </Link>
 
             <Link href="/asmaul-husna">
-              <div className="px-5 py-2.5 rounded-full text-xs font-bold bg-white text-gray-400 border border-gray-100 hover:border-gray-200 flex items-center gap-2 transition-all">
+              <div className="px-5 py-2.5 rounded-full text-xs font-bold bg-white text-gray-400 border border-gray-100 hover:border-gray-200 flex items-center gap-2 transition-all hover:text-[#5465ff]">
                 <Users2 className="w-3.5 h-3.5" />
                 Asmaul Husna
               </div>
             </Link>
 
             <Link href="/dzikir">
-              <div className="px-5 py-2.5 rounded-full text-xs font-bold bg-white text-gray-400 border border-gray-100 hover:border-gray-200 flex items-center gap-2 transition-all">
+              <div className="px-5 py-2.5 rounded-full text-xs font-bold bg-white text-gray-400 border border-gray-100 hover:border-gray-200 flex items-center gap-2 transition-all hover:text-[#5465ff]">
                 <Sparkles className="w-3.5 h-3.5" />
                 Dzikir
               </div>
@@ -134,8 +138,11 @@ export default function QuranIndex() {
 
         {/* GRID */}
         {loading ? (
-          <div className="flex flex-col items-center py-24 gap-4">
+          <div className="flex flex-col items-center py-32 gap-4">
             <Loader2 className="animate-spin w-10 h-10 text-[#5465ff] opacity-20" />
+            <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">
+              Menyiapkan Lembaran Suci...
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -154,16 +161,16 @@ export default function QuranIndex() {
                     className={cn(
                       "p-6 bg-white rounded-[2.5rem] border flex flex-col gap-4 relative transition-all duration-300",
                       isLastRead
-                        ? "border-[#5465ff] shadow-[0_10px_25px_-5px_rgba(84,101,255,0.15)] ring-1 ring-[#5465ff]/20"
-                        : "border-gray-100 shadow-sm hover:shadow-md",
+                        ? "border-[#5465ff] shadow-xl shadow-[#5465ff]/10 ring-1 ring-[#5465ff]/20"
+                        : "border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200",
                     )}
                   >
-                    {/* Badge Terakhir Dibaca - Muncul otomatis jika ID cocok */}
+                    {/* Badge Terakhir Dibaca */}
                     {isLastRead && (
                       <div className="absolute top-0 right-8 z-10">
-                        <div className="bg-[#5465ff] text-white text-[8px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-b-xl flex items-center gap-1 shadow-sm">
-                          <Bookmark className="w-2.5 h-2.5 fill-current" />
-                          Terakhir Dibaca
+                        <div className="bg-[#5465ff] text-white text-[8px] font-bold uppercase tracking-[0.15em] px-3 py-1.5 rounded-b-xl flex items-center gap-1 shadow-sm">
+                          <Star className="w-2 h-2 fill-current" />
+                          Istiqomah Membaca
                         </div>
                       </div>
                     )}
@@ -172,10 +179,10 @@ export default function QuranIndex() {
                       <div className="flex items-center gap-4">
                         <div
                           className={cn(
-                            "w-12 h-12 rounded-2xl flex items-center justify-center font-bold transition-colors",
+                            "w-12 h-12 rounded-2xl flex items-center justify-center font-bold transition-all duration-500",
                             isLastRead
-                              ? "bg-[#5465ff] text-white"
-                              : "bg-gray-50 text-gray-900",
+                              ? "bg-[#5465ff] text-white shadow-lg shadow-[#5465ff]/30 rotate-3"
+                              : "bg-gray-50 text-gray-400 group-hover:text-gray-900",
                           )}
                         >
                           {surah.nomor}
@@ -183,13 +190,14 @@ export default function QuranIndex() {
                         <div>
                           <h3
                             className={cn(
-                              "font-bold transition-colors",
+                              "font-bold text-lg transition-colors tracking-tight",
                               isLastRead ? "text-[#5465ff]" : "text-gray-900",
                             )}
                           >
                             {surah.nama_latin}
                           </h3>
-                          <p className="text-[10px] text-gray-400 font-medium">
+                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                            <Library className="w-2.5 h-2.5 opacity-50" />
                             {surah.tempat_turun} • {surah.jumlah_ayat} Ayat
                           </p>
                         </div>
@@ -198,18 +206,22 @@ export default function QuranIndex() {
                       <div className="text-right">
                         <p
                           className={cn(
-                            "text-xl font-serif transition-colors",
-                            isLastRead ? "text-[#5465ff]" : "text-gray-900",
+                            "text-2xl font-serif transition-colors leading-none mb-1",
+                            isLastRead ? "text-[#5465ff]" : "text-gray-800",
                           )}
                         >
                           {surah.nama}
                         </p>
-                        <ChevronRight
-                          className={cn(
-                            "w-4 h-4 ml-auto transition-colors",
-                            isLastRead ? "text-[#5465ff]" : "text-gray-200",
-                          )}
-                        />
+                        <div className="flex justify-end">
+                          <ChevronRight
+                            className={cn(
+                              "w-4 h-4 transition-all",
+                              isLastRead
+                                ? "text-[#5465ff] translate-x-1"
+                                : "text-gray-200",
+                            )}
+                          />
+                        </div>
                       </div>
                     </div>
                   </motion.div>

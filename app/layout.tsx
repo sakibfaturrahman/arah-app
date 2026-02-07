@@ -3,6 +3,7 @@ import { Montserrat, Onest } from "next/font/google";
 import "@/styles/globals.css";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import LocationPermission from "@/components/common/locationModal";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -16,7 +17,7 @@ const onest = Onest({
   weight: ["100", "300", "400", "500", "700", "900"],
 });
 
-// 1. Konfigurasi Viewport untuk PWA (Penting untuk warna bar HP)
+// 1. Konfigurasi Viewport untuk PWA
 export const viewport: Viewport = {
   themeColor: "#5465ff",
   width: "device-width",
@@ -42,7 +43,6 @@ export const metadata: Metadata = {
     apple: [
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
-    // Konfigurasi ikon Android untuk PWA
     other: [
       {
         rel: "android-chrome-192x192",
@@ -73,14 +73,23 @@ export default function RootLayout({
       <body
         className={`${montserrat.variable} ${onest.variable} font-sans antialiased bg-[#fafafa] text-gray-900 flex flex-col min-h-screen`}
       >
+        {/* Navigasi Utama */}
         <Navbar />
 
-        {/* Main content dengan padding top yang pas 
-            agar tidak tertutup navbar fixed.
+        {/* Main content dengan padding top yang pas.
+          Ditambahkan overflow-x-hidden untuk mencegah kebocoran margin mobile.
         */}
-        <main className="flex-grow pt-15 md:pt-13">{children}</main>
+        <main className="flex-grow pt-15 md:pt-13 overflow-x-hidden">
+          {children}
+        </main>
 
         <Footer />
+
+        {/* GLOBAL LOCATION GUARD
+          Komponen ini akan otomatis mendeteksi jika koordinat belum ada di storage,
+          meskipun pengguna melewati onboarding.
+        */}
+        <LocationPermission />
       </body>
     </html>
   );

@@ -28,7 +28,7 @@ export default function Footer() {
                   className="object-cover"
                 />
               </div>
-              <h2 className="text-xl font-black text-gray-900 tracking-tighter uppercase">
+              <h2 className="text-xl font-bold text-gray-900 tracking-tighter">
                 ARAH<span className="text-[#5465ff]">.</span>
               </h2>
             </Link>
@@ -41,7 +41,7 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-xs font-black text-gray-900 mb-6 uppercase tracking-[0.2em]">
+            <h3 className="text-xs font-bold text-gray-900 mb-6 tracking-[0.2em]">
               Fitur Utama
             </h3>
             <ul className="space-y-4">
@@ -68,7 +68,7 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-xs font-black text-gray-900 mb-6 uppercase tracking-[0.2em]">
+            <h3 className="text-xs font-bold text-gray-900 mb-6 tracking-[0.2em]">
               Bantuan
             </h3>
             <ul className="space-y-4">
@@ -89,7 +89,7 @@ export default function Footer() {
 
           {/* Social Section */}
           <div>
-            <h3 className="text-xs font-black text-gray-900 mb-6 uppercase tracking-[0.2em]">
+            <h3 className="text-xs font-bold text-gray-900 mb-6 tracking-[0.2em]">
               Ikuti Kami
             </h3>
             <div className="flex gap-3">
@@ -108,7 +108,7 @@ export default function Footer() {
               ))}
             </div>
             <div className="mt-6 p-4 bg-[#5465ff]/5 rounded-2xl border border-[#5465ff]/10">
-              <p className="text-[10px] font-bold text-[#5465ff] flex items-center gap-2 uppercase tracking-wider">
+              <p className="text-[10px] font-bold text-[#5465ff] flex items-center gap-2 tracking-wider">
                 <Sparkles className="w-3 h-3" /> Update Terupdate
               </p>
             </div>
@@ -118,11 +118,11 @@ export default function Footer() {
         {/* Bottom Copyright */}
         <div className="mt-20 pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
-            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+            <p className="text-[11px] font-bold text-gray-400 tracking-widest">
               © 2026 ARAH Project
             </p>
             <span className="text-gray-200">|</span>
-            <p className="text-[11px] font-bold text-gray-400 flex items-center gap-1.5 uppercase tracking-widest">
+            <p className="text-[11px] font-bold text-gray-400 flex items-center gap-1.5 tracking-widest">
               Dibuat untuk menemani perjalanan spiritualmu, setiap hari
               <Heart className="w-3 h-3 text-red-500" />
             </p>
@@ -131,13 +131,13 @@ export default function Footer() {
           <div className="flex gap-8">
             <a
               href="#"
-              className="text-[11px] font-black text-gray-400 hover:text-[#5465ff] uppercase tracking-widest transition-colors"
+              className="text-[11px] font-bold text-gray-400 hover:text-[#5465ff] tracking-widest transition-colors"
             >
               Privacy Policy
             </a>
             <a
               href="#"
-              className="text-[11px] font-black text-gray-400 hover:text-[#5465ff] uppercase tracking-widest transition-colors"
+              className="text-[11px] font-bold text-gray-400 hover:text-[#5465ff] tracking-widest transition-colors"
             >
               Terms
             </a>

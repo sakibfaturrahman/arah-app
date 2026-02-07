@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Onboarding from "@/components/onboarding";
-import Header from "@/components/home/header";
 import Greeting from "@/components/home/greeting";
 import HeroSection from "@/components/home/hero";
 import PrayerTimeTable from "@/components/home/prayersTime";
@@ -43,9 +42,7 @@ export default function Home() {
       >
         <div className="max-w-screen-md mx-auto px-4 md:px-6">
           {/* Header Mobile */}
-          <div className="md:hidden mb-4">
-            <Header />
-          </div>
+          <div className="md:hidden mb-4"></div>
 
           <div className="flex flex-col space-y-4">
             <Greeting />

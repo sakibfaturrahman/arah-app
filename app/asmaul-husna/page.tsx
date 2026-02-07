@@ -8,7 +8,9 @@ import {
   Loader2,
   BookOpen,
   Users2,
-  ScrollText,
+  Moon,
+  Star,
+  Compass,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -38,16 +40,21 @@ export default function AsmaulHusnaPage() {
   return (
     <div className="min-h-screen bg-[#fafafa] pb-32 pt-28">
       <div className="max-w-5xl mx-auto px-4">
-        {/* --- HEADER SECTION (Consistent with QuranIndex) --- */}
+        {/* --- HEADER SECTION --- */}
         <div className="mb-10 space-y-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
+            <div className="relative">
+              {/* Decorative Icon */}
+              <div className="absolute -top-8 -left-2 opacity-20">
+                <Moon className="w-12 h-12 text-[#5465ff] rotate-12" />
+              </div>
+
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tighter">
-                Asmaul{" "}
-                <span className="italic font-serif font-light">Husna</span>
+                Asmaul <span className="text-[#5465ff]">Husna</span>
                 <span className="text-[#5465ff]">.</span>
               </h1>
-              <p className="text-gray-500 font-medium mt-2">
+              <p className="text-gray-500 font-medium mt-2 flex items-center gap-2">
+                <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
                 Meresapi keagungan Allah melalui nama-nama-Nya yang indah.
               </p>
             </div>
@@ -66,7 +73,7 @@ export default function AsmaulHusnaPage() {
             </div>
           </div>
 
-          {/* --- MENU NAVIGASI INTERNAL (Sub-Menu) --- */}
+          {/* --- MENU NAVIGASI INTERNAL --- */}
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2">
             <Link href="/al-quran">
               <div className="px-5 py-2.5 rounded-full text-xs font-bold bg-white text-gray-400 border border-gray-100 hover:border-[#5465ff]/20 hover:text-[#5465ff] transition-all flex items-center gap-2 whitespace-nowrap">
@@ -98,7 +105,7 @@ export default function AsmaulHusnaPage() {
           </div>
         </div>
 
-        {/* --- GRID CONTENT --- */}
+        {/* --- GRID CONTENT (RTL Layout) --- */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
             <Loader2 className="animate-spin text-[#5465ff] w-10 h-10 opacity-20" />
@@ -107,7 +114,11 @@ export default function AsmaulHusnaPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+          /* Penambahan style direction: rtl supaya kartu mulai dari kanan */
+          <div
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"
+            style={{ direction: "rtl" }}
+          >
             <AnimatePresence mode="popLayout">
               {filteredAsma.map((item, index) => (
                 <motion.div
@@ -118,13 +129,20 @@ export default function AsmaulHusnaPage() {
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.3, delay: index * 0.01 }}
                   whileHover={{ y: -5 }}
+                  /* Kembalikan isi konten ke ltr supaya teks latin tidak terbalik */
                   className="group relative bg-white border border-slate-100 rounded-[2rem] p-6 hover:shadow-xl hover:shadow-[#5465ff]/5 hover:border-[#5465ff]/20 transition-all duration-500 flex flex-col items-center text-center h-full"
+                  style={{ direction: "ltr" }}
                 >
                   {/* Number Indicator */}
                   <div className="absolute top-5 left-5">
                     <span className="text-[10px] font-bold text-slate-300 group-hover:text-[#5465ff] transition-colors">
                       {String(item.id).padStart(2, "0")}
                     </span>
+                  </div>
+
+                  {/* Icon Decorative */}
+                  <div className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Compass className="w-3 h-3 text-[#5465ff]/30" />
                   </div>
 
                   {/* Arabic text */}
@@ -139,16 +157,16 @@ export default function AsmaulHusnaPage() {
 
                   {/* Latin & Meaning */}
                   <div className="space-y-2 flex-grow">
-                    <h3 className="text-sm font-bold text-[#5465ff] tracking-wide uppercase">
+                    <h3 className="text-sm font-black text-[#5465ff] tracking-wide uppercase">
                       {item.latin}
                     </h3>
                     <div className="h-px w-6 bg-slate-100 mx-auto group-hover:w-10 group-hover:bg-[#5465ff]/30 transition-all duration-500" />
-                    <p className="text-[11px] md:text-xs text-slate-500 font-medium leading-relaxed">
+                    <p className="text-[11px] md:text-xs text-slate-500 font-bold leading-relaxed">
                       {item.indo}
                     </p>
                   </div>
 
-                  {/* Minimal Interaction */}
+                  {/* Interaction */}
                   <button className="mt-4 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 hover:bg-rose-50">
                     <Heart className="w-3.5 h-3.5 text-rose-300 hover:text-rose-500 transition-colors" />
                   </button>

@@ -1,173 +1,191 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { Search, Bell, X, Sparkles } from "lucide-react";
+import React, { useState } from "react";
+import {
+  Search,
+  Bell,
+  X,
+  Sparkles,
+  Clock,
+  BookOpen,
+  History,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
-import { getPrayerTimes } from "@/lib/getPrayerTimes";
+import { getAllSurah } from "@/lib/getQuran";
+import { useNotification } from "@/hooks/useNotification";
 import { navItems, bottomNavItems } from "@/components/constants/navigation";
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { notification, setNotification } = useNotification();
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const [notification, setNotification] = useState<{
-    title: string;
-    message: string;
-  } | null>(null);
 
-  // Fungsi Pencarian Aktif ke Halaman Al-Quran
-  const handleSearch = (e: React.FormEvent) => {
+  // Contoh data riwayat notifikasi (Bisa dikembangkan menggunakan state/db)
+  const notifHistory = [
+    {
+      id: 1,
+      title: "Waktu Dzuhur",
+      desc: "Sudah masuk waktu shalat Dzuhur untuk wilayah Anda.",
+      time: "12:05",
+      icon: Clock,
+    },
+    {
+      id: 2,
+      title: "Lanjutkan Membaca",
+      desc: "Terakhir Anda membaca Al-Kahfi. Yuk selesaikan!",
+      time: "09:00",
+      icon: BookOpen,
+    },
+  ];
+
+  const handleSmartSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchValue.trim()) {
-      router.push(`/al-quran?search=${encodeURIComponent(searchValue.trim())}`);
-      setIsSearchOpen(false);
-      setSearchValue("");
-    }
-  };
+    const query = searchValue.toLowerCase().trim();
+    if (!query) return;
 
-  useEffect(() => {
-    const checkTimings = async () => {
-      // 1. Ambil Jadwal Shalat
-      const data = await getPrayerTimes();
-      const now = new Date();
-      const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    try {
+      const allSurah = await getAllSurah();
+      const matchSurah = allSurah.find(
+        (s: any) =>
+          query.includes(s.nama_latin.toLowerCase()) ||
+          s.nama_latin.toLowerCase().includes(query),
+      );
 
-      if (data) {
-        const prayers = [
-          { name: "Subuh", time: data.timings.Fajr },
-          { name: "Dzuhur", time: data.timings.Dhuhr },
-          { name: "Ashar", time: data.timings.Asr },
-          { name: "Maghrib", time: data.timings.Maghrib },
-          { name: "Isya", time: data.timings.Isha },
-        ];
-
-        const currentPrayer = prayers.find((p) => p.time === currentTime);
-        if (currentPrayer) {
-          setNotification({
-            title: `Waktunya Shalat ${currentPrayer.name}`,
-            message: `Sudah masuk pukul ${currentPrayer.time}. Mari sejenak menghadap Allah.`,
-          });
-        }
-      }
-
-      // 2. Cek Pengingat Tadarus (24 Jam)
-      const lastReadData = localStorage.getItem("lastReadSurah");
-      if (lastReadData) {
-        const { updatedAt, nama_latin } = JSON.parse(lastReadData);
-        const lastTime = new Date(updatedAt).getTime();
-        const diffInHours = (now.getTime() - lastTime) / (1000 * 60 * 60);
-
-        // Jika lebih dari 24 jam belum tadarus
-        if (diffInHours >= 24) {
-          setNotification({
-            title: "Waktunya Tadarus",
-            message: `Terakhir Anda membaca surah ${nama_latin}. Yuk, lanjutkan mengaji hari ini agar hati tetap tenang.`,
-          });
-        }
+      if (matchSurah) {
+        router.push(`/al-quran/${matchSurah.nomor}`);
+      } else if (query.includes("doa")) {
+        router.push(
+          `/doa?search=${encodeURIComponent(query.replace("doa", "").trim())}`,
+        );
       } else {
-        // Jika belum pernah baca sama sekali
-        setNotification({
-          title: "Mulai Mengaji",
-          message:
-            "Yuk mulai baca Al-Qur'an hari ini untuk keberkahan waktumu.",
-        });
+        router.push(`/al-quran?search=${encodeURIComponent(query)}`);
       }
-    };
-
-    // Jalankan pengecekan setiap menit
-    const interval = setInterval(checkTimings, 60000);
-    checkTimings(); // Jalankan sekali saat mount
-
-    return () => clearInterval(interval);
-  }, []);
+    } catch (error) {
+      router.push(`/al-quran?search=${encodeURIComponent(query)}`);
+    }
+    setIsSearchOpen(false);
+    setSearchValue("");
+  };
 
   return (
     <>
-      {/* --- GLOBAL SEARCH MODAL --- */}
+      {/* --- NOTIFICATION DRAWER (Right Side) --- */}
       <AnimatePresence>
-        {isSearchOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-sm p-4 flex items-start justify-center pt-20"
-          >
+        {isNotifOpen && (
+          <>
             <motion.div
-              initial={{ scale: 0.9, y: -20 }}
-              animate={{ scale: 1, y: 0 }}
-              className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsNotifOpen(false)}
+              className="fixed inset-0 z-[250] bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed right-0 top-0 bottom-0 z-[300] w-full max-w-[350px] bg-white shadow-2xl p-6 flex flex-col"
             >
-              <form
-                onSubmit={handleSearch}
-                className="p-4 flex items-center gap-3 border-b border-slate-100"
-              >
-                <Search className="w-5 h-5 text-[#5465ff]" />
-                <input
-                  autoFocus
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  placeholder="Cari Surah, Hadits, atau Doa..."
-                  className="flex-1 bg-transparent outline-none text-sm font-medium h-10"
-                />
-                <button type="button" onClick={() => setIsSearchOpen(false)}>
-                  <X className="w-5 h-5 text-slate-400" />
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[#5465ff]/10 rounded-2xl flex items-center justify-center text-[#5465ff]">
+                    <Bell className="w-5 h-5" />
+                  </div>
+                  <h2 className="text-lg font-black tracking-tighter text-gray-900 uppercase">
+                    Pesan Kita
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setIsNotifOpen(false)}
+                  className="p-2 bg-slate-50 rounded-xl text-slate-400"
+                >
+                  <X className="w-5 h-5" />
                 </button>
-              </form>
-              <div className="p-4 space-y-2">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">
-                  Saran
-                </p>
-                {["Al-Kahfi", "Dzikir Pagi", "Ar-Rahman"].map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => {
-                      setSearchValue(s);
-                    }}
-                    className="w-full text-left p-3 hover:bg-slate-50 rounded-xl text-xs font-bold text-slate-600 flex items-center gap-2 transition-colors"
+              </div>
+
+              <div className="flex-1 space-y-4 overflow-y-auto no-scrollbar">
+                {notifHistory.map((n) => (
+                  <div
+                    key={n.id}
+                    className="p-4 bg-slate-50 rounded-[1.5rem] border border-transparent hover:border-[#5465ff]/20 transition-all group"
                   >
-                    <Sparkles className="w-3 h-3 text-amber-400" /> {s}
-                  </button>
+                    <div className="flex gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 group-hover:text-[#5465ff] transition-colors">
+                        <n.icon className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start mb-1">
+                          <h4 className="text-xs font-bold text-gray-900">
+                            {n.title}
+                          </h4>
+                          <span className="text-[9px] font-bold text-slate-300">
+                            {n.time}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 leading-relaxed">
+                          {n.desc}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 ))}
+                {notifHistory.length === 0 && (
+                  <div className="text-center py-20">
+                    <History className="w-10 h-10 text-slate-200 mx-auto mb-3" />
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      Belum ada riwayat
+                    </p>
+                  </div>
+                )}
               </div>
             </motion.div>
-          </motion.div>
+          </>
         )}
       </AnimatePresence>
 
-      {/* --- NOTIFICATION POPUP --- */}
+      {/* --- REAL-TIME POPUP (Top Notification) --- */}
       <AnimatePresence>
         {notification && (
           <motion.div
             initial={{ opacity: 0, y: -100, x: "-50%" }}
-            animate={{ opacity: 1, y: 80, x: "-50%" }}
+            animate={{ opacity: 1, y: 30, x: "-50%" }}
             exit={{ opacity: 0, y: -100, x: "-50%" }}
-            className="fixed top-0 left-1/2 z-[150] w-[90%] max-w-md bg-white border shadow-xl rounded-2xl p-4 flex items-center gap-4"
+            className="fixed top-0 left-1/2 z-[400] w-[92%] max-w-md bg-white border-2 border-[#5465ff]/10 shadow-2xl rounded-[2rem] p-4 flex items-center gap-4 cursor-pointer"
+            onClick={() => setIsNotifOpen(true)}
           >
-            <div className="bg-[#5465ff]/10 p-2 rounded-full">
-              <Bell className="w-5 h-5 text-[#5465ff]" />
+            <div className="bg-[#5465ff] p-2.5 rounded-2xl shadow-lg shadow-blue-500/30 text-white shrink-0">
+              <Sparkles className="w-5 h-5 animate-pulse" />
             </div>
-            <div className="flex-1">
-              <h4 className="text-xs font-bold text-slate-900">
+            <div className="flex-1 min-w-0">
+              <h4 className="text-xs font-bold text-slate-900 leading-tight truncate">
                 {notification.title}
               </h4>
-              <p className="text-[10px] text-slate-500">
+              <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">
                 {notification.message}
               </p>
             </div>
-            <button onClick={() => setNotification(null)}>
-              <X className="w-4 h-4 text-slate-300" />
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setNotification(null);
+              }}
+              className="p-2 text-slate-300 hover:text-slate-500"
+            >
+              <X className="w-4 h-4" />
             </button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* --- HEADER MOBILE (Top Bar) --- */}
-      {/* --- HEADER MOBILE (Top Bar) --- */}
+      {/* --- MOBILE HEADER --- */}
       <div className="fixed top-0 left-0 right-0 z-[100] lg:hidden bg-white/80 backdrop-blur-md border-b px-4 h-16 flex items-center justify-between">
         <Link
           href="/"
@@ -175,33 +193,17 @@ export default function Navbar() {
         >
           <Image src="/logo.jpg" alt="Logo" fill className="object-cover" />
         </Link>
-
         <div className="flex items-center gap-2">
-          {/* Tombol Notifikasi */}
           <button
-            onClick={() => {
-              if (notification) {
-                // Aksi jika notifikasi diklik, misal buka modal atau scroll ke jadwal
-              } else {
-                setNotification({
-                  title: "Belum Ada Info",
-                  message: "Pantau terus waktu ibadahmu hari ini.",
-                });
-              }
-            }}
-            className="relative p-2.5 bg-slate-100 rounded-full text-slate-500 active:scale-95 transition-transform"
+            onClick={() => setIsNotifOpen(true)}
+            className="relative p-2.5 bg-slate-100 rounded-full text-slate-500"
           >
             <Bell className="w-5 h-5" />
-            {/* Indicator merah jika ada notifikasi aktif */}
-            {notification && (
-              <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full animate-pulse" />
-            )}
+            <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
           </button>
-
-          {/* Tombol Search */}
           <button
             onClick={() => setIsSearchOpen(true)}
-            className="p-2.5 bg-slate-100 rounded-full text-slate-500 active:scale-95 transition-transform"
+            className="p-2.5 bg-slate-100 rounded-full text-slate-500"
           >
             <Search className="w-5 h-5" />
           </button>
@@ -234,7 +236,7 @@ export default function Navbar() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "relative px-4 py-2 text-[12px] font-bold transition-all rounded-full whitespace-nowrap",
+                    "relative px-6 py-2.5 text-[12px] font-bold transition-all rounded-full whitespace-nowrap",
                     isActive
                       ? "text-white"
                       : "text-slate-400 hover:text-slate-900",
@@ -255,87 +257,73 @@ export default function Navbar() {
             })}
           </nav>
 
-          <button
-            onClick={() => setIsSearchOpen(true)}
-            className="p-3 bg-slate-100 hover:bg-white border rounded-full text-slate-400 transition-all"
-          >
-            <Search className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsNotifOpen(true)}
+              className="relative p-3.5 bg-slate-100 hover:bg-white border rounded-full text-slate-400 transition-all"
+            >
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-3.5 right-4 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+            </button>
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="p-3.5 bg-slate-100 hover:bg-white border rounded-full text-slate-400 transition-all"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* --- BOTTOM BAR MOBILE --- */}
-      {/* --- BOTTOM BAR MOBILE --- */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-[450px] lg:hidden z-[100]">
-        <nav className="bg-white/95 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.12)] border border-white/40 rounded-[2.5rem] px-2 py-2 flex justify-around items-center relative h-16">
-          {bottomNavItems.map((item, idx) => {
-            const isActive = pathname === item.href;
-            const isCenter = idx === 2; // Menu Al-Quran
-
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  "relative flex flex-col items-center justify-center transition-all duration-300 flex-1",
-                  isCenter ? "mb-6" : "mb-0", // Sedikit turun dari sebelumnya (tadi mb-4/5)
-                )}
+      {/* --- SEARCH MODAL (Tetap Sama) --- */}
+      <AnimatePresence>
+        {isSearchOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[400] bg-slate-900/60 backdrop-blur-sm p-4 flex items-start justify-center pt-20"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: -20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden"
+            >
+              <form
+                onSubmit={handleSmartSearch}
+                className="p-4 flex items-center gap-3 border-b border-slate-100"
               >
-                <div
-                  className={cn(
-                    "flex flex-col items-center justify-center transition-all duration-500 rounded-2xl w-full py-1",
-                    // Efek background semi-transparan untuk menu aktif non-center
-                    isActive && !isCenter ? "bg-[#5465ff]/5" : "",
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "flex items-center justify-center transition-all duration-500",
-                      isCenter
-                        ? "w-14 h-14 bg-[#5465ff] rounded-2xl shadow-lg shadow-blue-500/40 text-white"
-                        : "w-8 h-8",
-                      // Animasi scale lebih tegas saat aktif
-                      isActive ? "scale-110" : "scale-100",
-                    )}
+                <Search className="w-5 h-5 text-[#5465ff]" />
+                <input
+                  autoFocus
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  placeholder="Ketik 'Al Kahfi' atau 'Doa Makan'..."
+                  className="flex-1 bg-transparent outline-none text-sm font-medium h-10"
+                />
+                <button type="button" onClick={() => setIsSearchOpen(false)}>
+                  <X className="w-5 h-5 text-slate-400" />
+                </button>
+              </form>
+              <div className="p-4 space-y-2">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">
+                  Saran Cepat
+                </p>
+                {["Al-Kahfi", "Dzikir Pagi", "Doa Tidur"].map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSearchValue(s)}
+                    className="w-full text-left p-3 hover:bg-slate-50 rounded-xl text-xs font-bold text-slate-600 flex items-center gap-2 transition-colors"
                   >
-                    <item.icon
-                      className={cn(
-                        isCenter ? "w-7 h-7" : "w-5 h-5",
-                        // Warna ikon lebih menyala saat aktif
-                        isActive && !isCenter
-                          ? "text-[#5465ff]"
-                          : "text-slate-400",
-                        isActive && isCenter ? "animate-pulse" : "",
-                      )}
-                    />
-                  </div>
-
-                  {!isCenter && (
-                    <span
-                      className={cn(
-                        "text-[10px] font-bold mt-1 transition-colors duration-300",
-                        isActive
-                          ? "text-[#5465ff] opacity-100"
-                          : "text-slate-400 opacity-70",
-                      )}
-                    >
-                      {item.name}
-                    </span>
-                  )}
-                </div>
-
-                {/* Indikator Glow di bawah menu aktif */}
-                {isActive && !isCenter && (
-                  <motion.div
-                    layoutId="mobileActiveGlow"
-                    className="absolute -bottom-1 w-5 h-1 bg-[#5465ff] rounded-full shadow-[0_0_8px_rgba(84,101,255,0.6)]"
-                  />
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
+                    <Sparkles className="w-3 h-3 text-amber-400" /> {s}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
