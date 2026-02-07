@@ -21,7 +21,7 @@ export const navItems = [
 export const bottomNavItems = [
   { name: "Home", icon: Home, href: "/" },
   { name: "Hadits", icon: ScrollText, href: "/hadits" },
-  { name: "Quran", icon: BookOpen, href: "/al-quran" }, // Posisi Index 2
-  { name: "Dzikir", icon: Sparkles, href: "/dzikir" },
+  { name: "Quran", icon: BookOpen, href: "/al-quran" },
   { name: "Doa", icon: LucideHeartHandshake, href: "/hisnul-muslim" },
+  { name: "Waktu", icon: Clock, href: "/waktu-shalat" },
 ];

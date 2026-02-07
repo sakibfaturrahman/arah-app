@@ -1,5 +1,4 @@
 export async function getHijriDate() {
-  // Ambil tanggal hari ini dalam format DD-MM-YYYY
   const today = new Date();
   const day = String(today.getDate()).padStart(2, "0");
   const month = String(today.getMonth() + 1).padStart(2, "0");
@@ -15,7 +14,7 @@ export async function getHijriDate() {
 
     if (result.code === 200) {
       const data = result.data.hijri;
-      // Mengembalikan objek yang rapi: "18 Syaban 1446"
+      // Menggunakan nama bulan Indonesia jika perlu, atau data.month.en sesuai keinginan Anda
       return `${data.day} ${data.month.en} ${data.year} H`;
     }
     return null;
