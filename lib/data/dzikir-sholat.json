@@ -1,0 +1,185 @@
+{
+  "status": 200,
+  "data": [
+    {
+      "type": "solat",
+      "arab": "أَسْتَغْفِرُ اللَّهَ الْعَظِيمَ الَّذِي لَا إِلَهَ إِلَّا هُوَ الْحَيَّ الْقَيُّومَ وَأَتُوبُ إِلَيْه",
+      "indo": "Aku memohon ampunan kepada Allah yang Maha Agung, tiada tuhan selain Dia yang Maha Hidup lagi Maha Berdiri Sendiri, dan aku bertaubat pada-Nya.",
+      "ulang": "3x"
+    },
+    {
+      "type": "solat",
+      "arab": "لَاإِلَهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيْكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ يُحْيِيْ وَيُمِيْتُ وَهُوَ عَلَى كُلِّ شَيْئٍ قَدِيْرٌ",
+      "indo": "Tidak ada Tuhan kecuali Allah sendiri, tak ada Sekutu bagiNya. BagiNya-lah kerajaan dan bagiNya-lah segala pujian. Ia menghidupkan dan mematikan, dan Ia Maha Kuasa atas segala sesuatu.",
+      "ulang": "3x"
+    },
+    {
+      "type": "solat",
+      "arab": "اَللَّهُمَّ أَنْتَ السَّلاَمُ وَمِنْكَ السَّلاَمُ وَإِلَيْكَ يَعُوْدُ السَّلاَمُ فَحَيِّنَا رَبَّنَا بِالسَّلاَمِ وَأَدْخِلْنَا الْجَنَّةَ دَارَ السَّلاَمِ تَبَارَكْتَ رَبَّنَا وَتَعَالَيْتَ يَا ذَالْجَلاَلِ وَالْأِ كْرَامِ",
+      "indo": "Ya Allah, Engkau adalah Dzat yang mempunyai kesejahteraan, dari-Mu kesejahteraan itu, kepada-Mu akan kembali lagi segala kesejahteraan itu, Ya Tuhan kami, hidupkanlah kami dengan sejahtera. Masukanlah kami ke dalam surga kampung kesejahteraan. Engkaulah yang berkuasa memberi berkah yang banyak dan Engkaulah Yang Maha Tinggi, wahai Dzat yang memiliki keagungan dan kemuliaan.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ",
+      "indo": "Aku berlindung kepada Allah dari godaan syaitan yang terkutuk.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ",
+      "indo": "Dengan menyebut nama Allah Yang Maha Pengasih lagi Maha Penyayang.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "بِسْمِ اللّهِ الرَّحْمَنِ الرَّحِيمِ ﴿١﴾ الْحَمْدُ للّهِ رَبِّ الْعَالَمِينَ ﴿٢﴾ الرَّحْمنِ الرَّحِيمِ ﴿٣﴾ مَلِكِ يَوْمِ الدِّينِ ﴿٤﴾ إِيَّاكَ نَعْبُدُ وإِيَّاكَ نَسْتَعِينُ ﴿٥﴾ اهدِنَا الصِّرَاطَ المُستَقِيمَ ﴿٦﴾ صِرَاطَ الَّذِينَ أَنعَمتَ عَلَيهِمْ غَيرِ المَغضُوبِ عَلَيهِمْ وَلاَ الضَّالِّينَ",
+      "indo": "(1/1) Dengan menyebut nama Allah Yang Maha Pemurah lagi Maha Penyayang. (1/2) Segala puji bagi Allah, Tuhan semesta alam. (1/3) Maha Pemurah lagi Maha Penyayang. (1/4) Yang menguasai di Hari Pembalasan. (1/5) Hanya Engkaulah yang kami sembah, dan hanya kepada Engkaulah kami meminta pertolongan. (1/6) Tunjukilah kami jalan yang lurus, (1/7) (yaitu) Jalan orang-orang yang telah Engkau beri nikmat kepada mereka; bukan (jalan) mereka yang dimurkai dan bukan (pula jalan) mereka yang sesat.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "وَاِلٰهُكُمْ اِلٰهٌ وَّاحِدٌۚ  لَآاِلٰهَ اِلَّا هُوَ الرَّحْمٰنُ الرَّحِيْمُ اَللّٰهُ لَآ اِلٰهَ اِلَّا هُوَۚ اَلْحَيُّ الْقَيُّوْمُ ەۚ لَا تَأْخُذُهٗ سِنَةٌ وَّلَا نَوْمٌۗ  لَهٗ مَا فِى السَّمٰوٰتِ وَمَا فِى الْاَرْضِۗ مَنْ ذَا الَّذِيْ يَشْفَعُ عِنْدَهٗٓ اِلَّا بِاِذْنِهٖۗ يَعْلَمُ مَا بَيْنَ اَيْدِيْهِمْ وَمَا خَلْفَهُمْۚ وَلَا يُحِيْطُوْنَ بِشَيْءٍ مِّنْ عِلْمِهٖٓ اِلَّا بِمَا شَاۤءَۚ وَسِعَ كُرْسِيُّهُ السَّمٰوٰتِ وَالْاَرْضَۚ وَلَا يَـُٔوْدُهٗ حِفْظُهُمَاۚ وَهُوَ الْعَلِيُّ الْعَظِيْمُ",
+      "indo": "Dan Tuhanmu adalah Tuhan Yang Maha Esa; tidak ada Tuhan melainkan Dia Yang Maha Pemurah lagi Maha Penyayang. Allah, tidak ada Tuhan (yang berhak disembah) melainkan Dia Yang Hidup kekal lagi terus menerus mengurus (makhluk-Nya); tidak mengantuk dan tidak tidur. Kepunyaan-Nya apa yang di langit dan di bumi. Tiada yang dapat memberi syafa´at di sisi Allah tanpa izin-Nya? Allah mengetahui apa-apa yang di hadapan mereka dan di belakang mereka, dan mereka tidak mengetahui apa-apa dari ilmu Allah melainkan apa yang dikehendaki-Nya. Kursi Allah meliputi langit dan bumi. Dan Allah tidak merasa berat memelihara keduanya, dan Allah Maha Tinggi lagi Maha Besar.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "اِلَهَنَا يَارَبَّناَ أَنْتَ مَوْلنَا : سُبْحَنَ اللهِ",
+      "indo": "Wahai tuhanku/kami, engkau tuanku/kami pembimbing kami, Maha Suci Allah.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "سُبْحَانَ ٱللَّٰهِ‎",
+      "indo": "Maha suci allah.",
+      "ulang": "33x"
+    },
+    {
+      "type": "solat",
+      "arab": "سُبْحَنَ اللهِ وَبِحَمْدِهِ دَائِمًا أَبَدًا : أَلْحَمْدُ لِلَّه",
+      "indo": "Maha Suci Allah, yang Maha Agung, dan dengan MemujiNya selalu selama-lamanya dan abadi. Segala Puji Bagi Allah.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "اَلْحَمْدُ لِلَّهِ",
+      "indo": "Segala puji bagi alloh.",
+      "ulang": "33x"
+    },
+    {
+      "type": "solat",
+      "arab": "أَلْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِيْنَ عَلَى كُلِّ حَالٍ وَنِعْمَةٍ : اللهُ أَكْبَرُ",
+      "indo": "Segala puji hanya bagi Allah, atas segala dan dalam keadaan kenikmatan, Allah Maha Besar.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "اللهُ أَكْبَرُ",
+      "indo": "Allah maha besar.",
+      "ulang": "33x"
+    },
+    {
+      "type": "solat",
+      "arab": "أَللهُ أَكْبَرُ كَبِيْرًا وَالْحَمْدُ لِلَّهِ كَثِيْرًا وَسُبْحَنَ اللَّهِ بُكْرَةً وَأَصِيْلاً",
+      "indo": "Allah Maha Besar dengan sebesar-besarnya, segala puji bagi Allah dengan pujian yang banyak. Mahasuci Allah pada waktu pagi dan petang.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "لاَ إِلهَ إِلاَّ اللهُ وَحْدَهُ لاَشَرِيْكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ يُحْيِيْ وَيُمِيْتُ وَهُوَ عَلى كُلِّ شُيْئٍ قَدِيْرٌ.",
+      "indo": "Tidak ada ilah yang berhak disembah selain Allah semata, tidak ada sekutu bagiNya. Bagi-Nya kerajaan dan segala pujian. Dia-lah yang berkuasa atas segala sesuatu.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "وَلَاحَوْلَ وَلَا قُوَّةَ إِلَّا بِاللهِ الْعَلِيِّ الْعَظِيْمِ",
+      "indo": "Tiada daya dan kekuatan, melainkan dengan pertolongan Allah yang Maha Agung.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "اَسْتَغْفِرُ اللهَ الْعَظِيْمَ",
+      "indo": "Aku memohon ampun kepada Allah Yang Maha Agung.",
+      "ulang": "33x"
+    },
+    {
+      "type": "solat",
+      "arab": "إِنَّ ٱللَّهَ غَفُورٌ رَّحِيمٌ",
+      "indo": "Sesungguhnya Allah Maha Pengampun lagi Maha Penyayang.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "ٲَفْضَلُ الذِّكْرِ فَاعْلَمْ ٲَنَّهُ",
+      "indo": "Ketahuilah, sebaik-baik dzikir adalah",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "لآإِلَهَ إِلاَّ الله",
+      "indo": "Tiada tuhan selain allah.",
+      "ulang": "33x"
+    },
+    {
+      "type": "solat",
+      "arab": "لاَ إِلَهَ إِلاَّ اللهُ مُحَمَّدٌ رَسُوْلُ اللهِ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ، كَلِمَةُ حَقٍّ عَلَيْهَا نَحْيَا وَعَلَيْهَا نَمُوْتُ وَبِهَا نُبْعَثُ إِنْ شَآءَ اللهُ مِنَ اْلآمِنِيْنَ",
+      "indo": "Tiada tuhan selain allah, Muhammad Rasulullah SAW Dengan kalimat itu, kami hidup. Dengannya, kami wafat. Dengannya pula insya Allah kelak kami dibangkitkan, in syaallah semoga termasuk kedalam golongan orang orang yang iman.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "بِسْمِ اللهِ الرَّحْمَنِ الرَّحِيْمِ. اَلْحَمْدُ ِللهِ رَبِّ الْعَالَمِيْنَ. حَمْدًا يُوَافِىْ نِعَمَهُ وَيُكَافِئُ مَزِيْدَهُ. يَارَبَّنَالَكَ الْحَمْدُ وَلَكَ الشُّكْرُ كَمَا يَنْبَغِىْ لِجَلاَلِ وَجْهِكَ وَعَظِيْمِ سُلْطَانِكَ",
+      "indo": "Dengan nama Allah Yang Maha Pengasih Lagi Maha Penyayang. Segala puji bagi Allah Tuhan Semesta Alam. Pujian yang sebanding dengan nikmat-nikmatNya dan menjamin tambahannya. Wahai Tuhan kami, bagi-Mu-lah segala puji, dan bagi-Mu-lah segalah syukur, sebagaimana layak bagi keluhuran zat-Mu dan keagungan kekuasaan-Mu.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "اَللهُمَّ صَلِّ وَسَلِّمْ عَلَى سَيِّدِنَا مُحَمَّدٍ وَعَلى آلِ سَيِّدِنَا مُحَمَّدٍ. صَلاَةً تُنْجِيْنَابِهَا مِنْ جَمِيْعِ اْلاَهْوَالِ وَاْلآفَاتِ. وَتَقْضِىْ لَنَابِهَا جَمِيْعَ الْحَاجَاتِ.وَتُطَهِّرُنَا بِهَا مِنْ جَمِيْعِ السَّيِّئَاتِ. وَتَرْفَعُنَابِهَا عِنْدَكَ اَعْلَى الدَّرَجَاتِ. وَتُبَلِّغُنَا بِهَا اَقْصَى الْغَيَاتِ مِنْ جَمِيْعِ الْخَيْرَاتِ فِى الْحَيَاةِ وَبَعْدَ الْمَمَاتِ اِنَّهُ سَمِيْعٌ قَرِيْبٌ مُجِيْبُ الدَّعَوَاتِ وَيَاقَاضِىَ الْحَاجَاتِ.",
+      "indo": "Wahai Allah, limpahkanlah rahmat dan kesejahteraan kepada penghulu kami, Nabi Muhammad dan keluarganya, yaitu rahmat yang dapat menyelamatkan kami dari segala ketakutan dan penyakit, yang dapat memenuhi segala kebutuhan kami, yang dapat mensucikan diri kami dari segala keburukan, yang dapat mengangkat derajat kami ke derajat tertinggi di sisi-Mu, dan dapat menyampaikan kami kepada tujuan maksimal dari segala kebaikan, baik semasa hidup maupun sesudah mati. Sesunggunya Dia (Allah) Maha Mendengar, Maha Dekat, lagi Maha Memperkenankan segala doa dan permohonan. Wahai Dzat yang Maha Memenuhi segala kebutuhan Hamba-Nya.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "اَللهُمَّ اِنَّا نَسْئَلُكَ سَلاَمَةً فِى الدِّيْنِ وَالدُّنْيَا وَاْلآخِرَةِ وَعَافِيَةً فِى الْجَسَدِ وَصِحَّةً فِى الْبَدَنِ وَزِيَادَةً فِى الْعِلْمِ وَبَرَكَةً فِى الرِّزْقِ وَتَوْبَةً قَبْلَ الْمَوْتِ وَرَحْمَةً عِنْدَ الْمَوْتِ وَمَغْفِرَةً بَعْدَ الْمَوْتِ. اَللهُمَّ هَوِّنْ عَلَيْنَا فِىْ سَكَرَاتِ الْمَوْتِ وَالنَّجَاةَ مِنَ النَّارِ وَالْعَفْوَ عِنْدَ الْحِسَابِ.",
+      "indo": "Wahai Allah! Sesungguhnya kami memohon kepadaMu, kesejahteraan dalam agama, dunia dan akhirat, keafiatan jasad, kesehatan badan, tambahan ilmu, keberkahan rezeki, taubat sebelum datang maut, rahmat pada saat datang maut, dan ampunan setelah datang maut. Wahai Allah! Permudahkanlah kami dalam menghadapi sakaratul maut, (Berilah kami) keselamatan dari api neraka, dan ampunan pada saat dilaksanakan hisab.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "اَللهُمَّ اِنَّا نَعُوْذُبِكَ مِنَ الْعَجْزِ وَالْكَسَلِ وَالْبُخْلِ وَالْهَرَمِ وَعَذَابِ الْقَبْرِ",
+      "indo": "Wahai Allah! Sesungguhnya kami berlindung kepadaMu dari sifat lemah, malas, kikir, pikun dan dari azab kubur.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "اَللهُمَّ اِنَّا نَعُوْذُبِكَ مِنْ عِلْمٍ لاَيَنْفَعُ وَمِنْ قَلْبٍ لاَيَخْشَعُ وَمِنْ نَفْسٍ لاَتَشْبَعُ وَمِنْ دَعْوَةٍ لاَيُسْتَجَابُ لَهَا.",
+      "indo": "Wahai Allah! Sesungguhnya kami berlindung kepadaMu dari ilmu yang tidak bermanfaat, dari hati yang tidak khusyu’, dari jiwa yang tidak kenal puas, dan dari doa yanag tak terkabul.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "رَبَّنَااغْفِرْلَنَا ذُنُوْبَنَا وَلِوَالِدِيْنَا وَلِمَشَايِخِنَا وَلِمُعَلِّمِيْنَا وَلِمَنْ لَهُ حَقٌّ عَلَيْنَا وَلِمَنْ اَحَبَّ وَاَحْسَنَ اِلَيْنَا وَلِكَافَّةِ الْمُسْلِمِيْنَ اَجْمَعِيْنَ",
+      "indo": "Wahai Tuhan Kami, ampunilah dosa-dosa kami, dosa-dosa orang tua kami, para sesepuh kami, para guru kami, orang-orang yang mempunyai hak atas kami, orang-orang yang cinta dan berbuat baik kepada kami, dan seluruh umat islam.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "رَبَّنَا تَقَبَّلْ مِنَّا اِنَّكَ اَنْتَ السَّمِيْعُ الْعَلِيْمُ وَتُبْ عَلَيْنَا اِنَّكَ اَنْتَ التَّوَّابُ الرَّحِيْمُ",
+      "indo": "Wahai Tuhan kami, perkenankanlah (permohonan) dari kami, sesungguhnya Engkau Maha Mendengar Lagi Maha Mengetahui. Dan terimalah taubat kami, sesungguhnya Engkau Maha Menerima Taubat lagi Maha Penyayang.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "رَبَّنَا أَتِنَا فِى الدُّنْيَا حَسَنَةً وَفِي اْلأَخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
+      "indo": "Ya Tuhan kami, berilah kami kebaikan hidup di dunia dan kebaikan hidup di akhirat, dan jagalah kami dari siksa api neraka.",
+      "ulang": "1x"
+    },
+    {
+      "type": "solat",
+      "arab": "وَصَلَّى اللهُ عَلى سَيِّدِنَا مُحَمَّدٍ وَعَلى آلِهِ وَصَحْبِهِ وَسَلَّمَ وَالْحَمْدُ ِللهِ رَبِّ الْعَالَمِيْنَ",
+      "indo": "Semoga Allah memberikan rahmat dan kesejahteraan kepada penghulu kami, Nabi Muhammad, keluarga dan sahabatnya dan segala puji bagi Allah, Tuhan Semesta Alam.",
+      "ulang": "1x"
+    }
+  ]
+}
