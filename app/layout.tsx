@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Montserrat, Onest } from "next/font/google";
 import "@/styles/globals.css";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
-import LocationPermission from "@/components/common/locationModal";
+import ClientLayout from "./client-layout"; // Kita akan buat file ini
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -17,7 +15,6 @@ const onest = Onest({
   weight: ["100", "300", "400", "500", "700", "900"],
 });
 
-// 1. Konfigurasi Viewport untuk PWA
 export const viewport: Viewport = {
   themeColor: "#5465ff",
   width: "device-width",
@@ -29,11 +26,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Arah - Pendamping Ibadah Modern",
   description: "Jadwal Sholat, Al-Quran, dan Fitur Islami",
-
-  // 2. Koneksi ke file manifest.json
   manifest: "/manifest.json",
-
-  // 3. Implementasi Favicon Lengkap
   icons: {
     icon: [
       { url: "/favicon.ico" },
@@ -44,18 +37,10 @@ export const metadata: Metadata = {
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
     other: [
-      {
-        rel: "android-chrome-192x192",
-        url: "/android-chrome-192x192.png",
-      },
-      {
-        rel: "android-chrome-512x512",
-        url: "/android-chrome-512x512.png",
-      },
+      { rel: "android-chrome-192x192", url: "/android-chrome-192x192.png" },
+      { rel: "android-chrome-512x512", url: "/android-chrome-512x512.png" },
     ],
   },
-
-  // 4. Pengaturan Apple Web App (iOS)
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -73,23 +58,8 @@ export default function RootLayout({
       <body
         className={`${montserrat.variable} ${onest.variable} font-sans antialiased bg-[#fafafa] text-gray-900 flex flex-col min-h-screen`}
       >
-        {/* Navigasi Utama */}
-        <Navbar />
-
-        {/* Main content dengan padding top yang pas.
-          Ditambahkan overflow-x-hidden untuk mencegah kebocoran margin mobile.
-        */}
-        <main className="flex-grow pt-15 md:pt-13 overflow-x-hidden">
-          {children}
-        </main>
-
-        <Footer />
-
-        {/* GLOBAL LOCATION GUARD
-          Komponen ini akan otomatis mendeteksi jika koordinat belum ada di storage,
-          meskipun pengguna melewati onboarding.
-        */}
-        <LocationPermission />
+        {/* Pindahkan logika client-side (Onboarding/Navbar) ke sini */}
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

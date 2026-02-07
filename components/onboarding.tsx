@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Clock,
@@ -54,6 +54,12 @@ interface OnboardingProps {
 export default function Onboarding({ onComplete }: OnboardingProps) {
   const [current, setCurrent] = useState(0);
   const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowWelcome(false), 1400);
+    return () => clearTimeout(t);
+  }, []);
 
   const handleNext = useCallback(() => {
     if (current < onboardingData.length - 1) {
@@ -91,6 +97,29 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
         <div className="absolute -top-20 -right-20 w-96 h-96 bg-[#5465ff]/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-100/20 rounded-full blur-3xl" />
       </div>
+
+      {/* Welcome overlay (appears on first open) */}
+      <AnimatePresence>
+        {showWelcome && (
+          <motion.div
+            key="welcome"
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.96 }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
+            onClick={() => setShowWelcome(false)}
+            className="absolute inset-0 z-[10000] bg-white/95 flex flex-col items-center justify-center p-6"
+          >
+            <Sparkles className="w-16 h-16 text-[#5465ff] mb-4" />
+            <h1 className="text-2xl md:text-4xl font-serif text-slate-900 mb-2">
+              Selamat Datang
+            </h1>
+            <p className="text-sm text-slate-500 mb-6 max-w-xs text-center">
+              Selamat datang di ARAH — pendamping ibadah harian Anda.
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence mode="wait">
         {!showLocationModal ? (
