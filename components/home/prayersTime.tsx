@@ -208,7 +208,7 @@ export default function PrayerTimeTable() {
                 {status && (
                   <span
                     className={cn(
-                      "text-[9px] font-black uppercase tracking-tighter px-2 py-1 rounded-lg border border-transparent",
+                      "text-[9px] font-bold uppercase tracking-tighter px-2 py-1 rounded-lg border border-transparent",
                       status.color,
                     )}
                   >
@@ -220,7 +220,7 @@ export default function PrayerTimeTable() {
               <div className="mt-auto space-y-1">
                 <h3
                   className={cn(
-                    "text-[10px] font-black uppercase tracking-[0.2em] transition-colors",
+                    "text-[10px] font-bold uppercase tracking-[0.2em] transition-colors",
                     isActive ? "text-[#5465ff]" : "text-slate-400",
                   )}
                 >
@@ -229,7 +229,7 @@ export default function PrayerTimeTable() {
                 <div className="flex items-center gap-2">
                   <span
                     className={cn(
-                      "text-3xl sm:text-4xl font-black font-mono tracking-tighter transition-all",
+                      "text-3xl sm:text-4xl font-bold font-mono tracking-tighter transition-all",
                       isActive ? "text-slate-900" : "text-slate-600",
                     )}
                   >

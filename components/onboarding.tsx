@@ -89,18 +89,14 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[999] bg-[#FAFAFA] flex flex-col items-center justify-center overflow-hidden font-sans">
-      {/* --- BACKGROUND ANIMATION --- */}
-      <div className="absolute inset-0 pointer-events-none">
+    // Tambahkan pointer-events-auto agar semua elemen di dalamnya bisa merespon klik
+    <div className="fixed inset-0 z-[9999] bg-[#FAFAFA] flex flex-col items-center justify-center overflow-hidden font-sans pointer-events-auto">
+      {/* --- BACKGROUND ANIMATION (Kecilkan Z-Index agar tidak menutupi tombol) --- */}
+      <div className="absolute inset-0 pointer-events-none z-0">
         <motion.div
           animate={{ rotate: 360, scale: [1, 1.1, 1] }}
           transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
           className="absolute -top-20 -right-20 w-96 h-96 bg-[#5465ff]/10 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ y: [0, 50, 0] }}
-          transition={{ duration: 12, repeat: Infinity }}
-          className="absolute bottom-10 left-10 w-72 h-72 bg-amber-100/40 rounded-full blur-3xl"
         />
       </div>
 
@@ -111,14 +107,13 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-            className="relative z-10 w-full max-w-xl px-6 h-full flex flex-col items-center justify-center py-10"
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            // Pointer events auto sangat penting di sini
+            className="relative z-10 w-full max-w-xl px-6 h-full flex flex-col items-center justify-center py-10 pointer-events-auto"
           >
             {/* Scrollable Content */}
             <div className="flex-1 w-full flex flex-col items-center justify-center pt-10">
               <motion.div
-                initial={{ scale: 0.8, rotate: -10 }}
-                animate={{ scale: 1, rotate: 0 }}
                 className={cn(
                   "p-8 rounded-[2.5rem] mb-8 shadow-inner shrink-0 flex items-center justify-center",
                   onboardingData[current].color,
@@ -143,12 +138,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                   </p>
                 </div>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="p-6 bg-white border border-slate-100 rounded-[2rem] shadow-sm w-full max-w-md relative"
-                >
+                <div className="p-6 bg-white border border-slate-100 rounded-[2rem] shadow-sm w-full max-w-md relative">
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#5465ff] text-white px-4 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest flex items-center gap-1">
                     <Sparkles className="w-2 h-2 fill-white" /> Mengenal ARAH
                   </div>
@@ -158,41 +148,40 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                   <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium">
                     {onboardingData[current].introDesc}
                   </p>
-                </motion.div>
+                </div>
               </div>
             </div>
 
             {/* --- CONTROLS Area --- */}
-            <div className="w-full max-w-xs space-y-6 mt-8 pb-10">
+            <div className="w-full max-w-xs space-y-6 mt-8 pb-10 relative z-20">
               <div className="flex justify-center gap-2">
                 {onboardingData.map((_, i) => (
-                  <motion.div
+                  <div
                     key={i}
-                    animate={{ width: i === current ? 32 : 8 }}
                     className={cn(
-                      "h-1.5 rounded-full transition-colors duration-300",
-                      i === current ? "bg-[#5465ff]" : "bg-slate-200",
+                      "h-1.5 rounded-full transition-all duration-300",
+                      i === current ? "bg-[#5465ff] w-8" : "bg-slate-200 w-2",
                     )}
                   />
                 ))}
               </div>
 
               <div className="flex flex-col gap-3">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.95 }}
+                <button
+                  // Ubah dari motion.button ke button biasa dulu untuk test,
+                  // atau pastikan z-index tombol paling tinggi.
                   onClick={handleNext}
-                  className="w-full py-5 bg-[#5465ff] text-white rounded-full text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-[#5465ff]/30 cursor-pointer active:brightness-90 transition-all"
+                  className="w-full py-5 bg-[#5465ff] text-white rounded-full text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-[#5465ff]/30 cursor-pointer hover:brightness-110 active:scale-[0.98] transition-all relative z-30"
                 >
                   {current === onboardingData.length - 1
                     ? "Buka Pintu Hikmah"
                     : "Lanjutkan"}
                   <ArrowRight className="w-4 h-4" />
-                </motion.button>
+                </button>
 
                 <button
                   onClick={() => setShowLocationModal(true)}
-                  className="text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-[#5465ff] transition-colors py-2 cursor-pointer"
+                  className="text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-[#5465ff] transition-colors py-2 cursor-pointer relative z-30"
                 >
                   Lewati Perkenalan
                 </button>
@@ -205,7 +194,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
             key="location-modal"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="relative z-20 w-full max-w-xs md:max-w-sm px-6"
+            className="relative z-50 w-full max-w-xs md:max-w-sm px-6 pointer-events-auto"
           >
             <div className="bg-white p-10 rounded-[3rem] shadow-2xl text-center border border-slate-50 space-y-8">
               <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto">
@@ -225,19 +214,16 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                   Aktifkan Presisi
                 </h3>
                 <p className="text-sm text-slate-500 leading-relaxed font-medium">
-                  Izinkan lokasi untuk sinkronisasi waktu sholat yang akurat di
-                  posisi Anda saat ini.
+                  Izinkan lokasi untuk sinkronisasi waktu sholat yang akurat.
                 </p>
               </div>
               <div className="space-y-3">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.95 }}
+                <button
                   onClick={requestLocation}
-                  className="w-full py-5 bg-[#5465ff] text-white rounded-2xl text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-200 cursor-pointer"
+                  className="w-full py-5 bg-[#5465ff] text-white rounded-2xl text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-200 cursor-pointer hover:brightness-110"
                 >
                   <MousePointer2 className="w-4 h-4" /> Izinkan Sekarang
-                </motion.button>
+                </button>
                 <button
                   onClick={safeComplete}
                   className="w-full py-5 bg-slate-50 text-slate-400 rounded-2xl text-xs font-bold hover:bg-slate-100 transition-colors cursor-pointer"
