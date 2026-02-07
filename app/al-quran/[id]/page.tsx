@@ -48,6 +48,7 @@ export default function DetailSurah() {
         setTafsirData(resTafsir);
 
         if (resAyat?.audio) {
+          if (audioRef.current) audioRef.current.pause();
           audioRef.current = new Audio(resAyat.audio);
           audioRef.current.onended = () => setIsPlaying(false);
         }
@@ -101,58 +102,90 @@ export default function DetailSurah() {
     return (
       <div className="h-screen flex flex-col items-center justify-center gap-4 bg-[#fafafa]">
         <Loader2 className="animate-spin text-[#5465ff] w-10 h-10" />
-        <p className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
           Memuat Surah...
         </p>
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-[#fafafa] pb-44 font-sans">
-      {/* 1. PROGRESS BAR (Indikator Scroll) */}
+    <div className="min-h-screen bg-[#fafafa] pb-20 md:pb-44 font-sans">
+      {/* 1. PROGRESS BAR */}
       <motion.div
-        className="fixed top-0 left-0 right-0 h-1.5 bg-[#5465ff] z-[60] origin-left"
+        className="fixed top-0 left-0 right-0 h-1.5 bg-[#5465ff] z-[110] origin-left"
         style={{ scaleX }}
       />
 
-      <div className="max-w-3xl mx-auto px-4 pt-12">
-        {/* Toggle View Mobile */}
-        <div className="md:hidden flex bg-gray-100 p-1.5 rounded-2xl mb-8 border border-gray-200/50 shadow-inner">
-          <button
-            onClick={() => setView("ayat")}
-            className={cn(
-              "flex-1 py-3 rounded-xl font-black text-xs transition-all",
-              view === "ayat"
-                ? "bg-white text-[#5465ff] shadow-sm"
-                : "text-gray-400",
-            )}
-          >
-            Ayat
-          </button>
-          <button
-            onClick={() => setView("tafsir")}
-            className={cn(
-              "flex-1 py-3 rounded-xl font-black text-xs transition-all",
-              view === "tafsir"
-                ? "bg-white text-[#5465ff] shadow-sm"
-                : "text-gray-400",
-            )}
-          >
-            Tafsir
-          </button>
-        </div>
+      {/* --- TOP CONTROL BAR (Mobile Only) --- 
+          Terletak di bawah header utama (top-16 karena tinggi header mobile biasanya h-16) */}
+      <div className="fixed top-16 left-0 w-full z-[90] lg:hidden bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm">
+        <div className="px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex gap-1">
+            <button
+              disabled={parseInt(id as string) <= 1}
+              onClick={() => goToSurah(parseInt(id as string) - 1)}
+              className="p-2 rounded-xl bg-gray-50 active:scale-95 disabled:opacity-20"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-600" />
+            </button>
+            <button
+              disabled={parseInt(id as string) >= 114}
+              onClick={() => goToSurah(parseInt(id as string) + 1)}
+              className="p-2 rounded-xl bg-gray-50 active:scale-95 disabled:opacity-20"
+            >
+              <ChevronRight className="w-5 h-5 text-gray-600" />
+            </button>
+          </div>
 
+          <div className="flex-1 min-w-0 text-center">
+            <h2 className="text-xs font-bold text-gray-900 truncate uppercase tracking-tight">
+              {data.nama_latin}
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleFullAudio}
+              className={cn(
+                "w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-90",
+                isPlaying
+                  ? "bg-orange-500 text-white"
+                  : "bg-[#5465ff] text-white",
+              )}
+            >
+              {isPlaying ? (
+                <Pause className="w-4 h-4 fill-current" />
+              ) : (
+                <Play className="w-4 h-4 fill-current ml-0.5" />
+              )}
+            </button>
+            <div className="flex bg-gray-100 p-1 rounded-xl">
+              <button
+                onClick={() => setView(view === "ayat" ? "tafsir" : "ayat")}
+                className="p-2 bg-white rounded-lg shadow-sm"
+              >
+                {view === "ayat" ? (
+                  <MessageSquareText className="w-4 h-4 text-[#5465ff]" />
+                ) : (
+                  <BookOpen className="w-4 h-4 text-[#5465ff]" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-3xl mx-auto px-4 pt-32 md:pt-12">
         <AnimatePresence mode="wait">
           {view === "ayat" ? (
             <motion.div
               key="ayat"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              {/* Pembukaan */}
-              <div className="text-center space-y-6 py-10 mb-4 mt-14">
+              <div className="text-center space-y-6 py-10 mb-4 md:mt-10">
                 <p className="text-xl md:text-2xl font-serif text-gray-400 italic">
                   أَعُوْذُ بِاللّٰهِ مِنَ الشَّيْطٰنِ الرَّجِيْمِ
                 </p>
@@ -169,7 +202,7 @@ export default function DetailSurah() {
                   className="p-6 md:p-10 bg-white rounded-[2.5rem] border border-gray-100 space-y-8 shadow-sm group"
                 >
                   <div className="flex justify-between items-center">
-                    <span className="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center text-[10px] font-black text-gray-400 border border-gray-100">
+                    <span className="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center text-[10px] font-bold text-gray-400 border border-gray-100">
                       {ayat.nomor}
                     </span>
                     <button
@@ -177,19 +210,16 @@ export default function DetailSurah() {
                       className={cn(
                         "flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-[10px] uppercase tracking-widest",
                         copiedId === ayat.id
-                          ? "bg-green-500 text-white shadow-lg shadow-green-200"
+                          ? "bg-green-500 text-white shadow-lg"
                           : "bg-gray-50 text-gray-400 hover:bg-[#5465ff] hover:text-white",
                       )}
                     >
                       {copiedId === ayat.id ? (
-                        <>
-                          <CheckCircle2 className="w-3 h-3" /> Tersalin
-                        </>
+                        <CheckCircle2 className="w-3 h-3" />
                       ) : (
-                        <>
-                          <Copy className="w-3 h-3" /> Salin Ayat
-                        </>
+                        <Copy className="w-3 h-3" />
                       )}
+                      {copiedId === ayat.id ? "Tersalin" : "Salin"}
                     </button>
                   </div>
                   <p
@@ -203,7 +233,7 @@ export default function DetailSurah() {
                       className="text-[#5465ff] text-sm md:text-base font-medium leading-relaxed"
                       dangerouslySetInnerHTML={{ __html: ayat.tr }}
                     />
-                    <p className="text-gray-500 text-sm md:text-base leading-relaxed">
+                    <p className="text-gray-500 text-sm md:text-base leading-relaxed text-justify">
                       {ayat.idn}
                     </p>
                   </div>
@@ -213,16 +243,17 @@ export default function DetailSurah() {
           ) : (
             <motion.div
               key="tafsir"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-4 pt-6 md:pt-10"
             >
               {tafsirData?.tafsir?.map((t: any) => (
                 <div
                   key={t.id}
                   className="p-8 bg-white rounded-[2.5rem] border border-gray-100 shadow-sm"
                 >
-                  <div className="px-4 py-1.5 bg-[#5465ff] text-white rounded-xl text-[10px] font-black tracking-widest uppercase inline-block mb-6">
+                  <div className="px-4 py-1.5 bg-[#5465ff] text-white rounded-xl text-[10px] font-bold tracking-widest uppercase inline-block mb-6">
                     Ayat {t.ayat}
                   </div>
                   <p className="text-gray-700 leading-loose text-justify font-medium whitespace-pre-line">
@@ -235,9 +266,10 @@ export default function DetailSurah() {
         </AnimatePresence>
       </div>
 
-      {/* --- FULL-WIDTH BOTTOM CONTROL BAR (NAVIGASI & AUDIO) --- */}
-      <div className="hidden md:flex fixed bottom-0 left-0 w-full z-50 bg-white/95 backdrop-blur-2xl border-t border-gray-100 px-8 py-5">
-        <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
+      {/* --- FLOATING BOTTOM CONTROL BAR (Desktop Only) --- */}
+      <div className="hidden lg:block fixed bottom-0 left-0 w-full z-[80] bg-white/90 backdrop-blur-2xl border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+        <div className="max-w-7xl mx-auto px-8 py-6 flex items-center justify-between">
+          {/* Nav Surah */}
           <div className="flex items-center gap-6 flex-1">
             <div className="flex gap-2">
               <button
@@ -255,27 +287,24 @@ export default function DetailSurah() {
                 <ChevronRight className="w-6 h-6" />
               </button>
             </div>
-
-            <div className="flex flex-col min-w-[160px]">
-              <h2 className="text-xl font-black text-gray-900 tracking-tight leading-none">
-                {data.nama} <span className="font-medium">·</span>{" "}
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 leading-none">
                 {data.nama_latin}
               </h2>
-              <p className="text-[10px] font-semibold text-[#5465ff] tracking-[0.25em] mt-2">
+              <p className="text-[10px] font-bold text-[#5465ff] tracking-widest uppercase mt-2">
                 {data.arti} • {data.jumlah_ayat} ayat
               </p>
             </div>
           </div>
-
-          {/* Audio Player Tengah */}
+          {/* Audio */}
           <div className="flex-1 flex justify-center">
             <button
               onClick={toggleFullAudio}
               className={cn(
-                "flex items-center gap-4 px-10 py-4 rounded-[1.5rem] font-semibold text-xs tracking-[0.15em] transition-all shadow-xl",
+                "flex items-center gap-4 px-10 py-4 rounded-[1.5rem] font-bold text-xs tracking-widest transition-all shadow-xl",
                 isPlaying
-                  ? "bg-orange-500 text-white shadow-orange-200"
-                  : "bg-[#5465ff] text-white shadow-blue-200",
+                  ? "bg-orange-500 text-white shadow-orange-100"
+                  : "bg-[#5465ff] text-white shadow-blue-100",
               )}
             >
               {isPlaying ? (
@@ -283,34 +312,32 @@ export default function DetailSurah() {
               ) : (
                 <Play className="fill-current w-4 h-4" />
               )}
-              {isPlaying ? "Jeda lantunan" : "Putar lantunan ayat"}
+              {isPlaying ? "JEDA" : "PUTAR AUDIO"}
             </button>
           </div>
-
-          <div className="flex-1 flex justify-end">
+          {/* Toggle View */}
+          <div className="flex justify-end flex-1">
             <div className="flex bg-gray-100/80 p-1.5 rounded-2xl border border-gray-200/50">
               <button
                 onClick={() => setView("ayat")}
                 className={cn(
-                  "flex items-center gap-3 px-8 py-3 rounded-xl font-semibold text-xs transition-all",
+                  "flex items-center gap-3 px-8 py-3 rounded-xl font-bold text-xs transition-all",
                   view === "ayat"
-                    ? "bg-white text-[#5465ff] shadow-md shadow-blue-100"
-                    : "text-gray-400 hover:text-gray-600",
+                    ? "bg-white text-[#5465ff] shadow-sm"
+                    : "text-gray-400",
                 )}
               >
-                <BookOpen className="w-4 h-4" />
                 Ayat
               </button>
               <button
                 onClick={() => setView("tafsir")}
                 className={cn(
-                  "flex items-center gap-3 px-8 py-3 rounded-xl font-semibold text-xs transition-all",
+                  "flex items-center gap-3 px-8 py-3 rounded-xl font-bold text-xs transition-all",
                   view === "tafsir"
-                    ? "bg-white text-[#5465ff] shadow-md shadow-blue-100"
-                    : "text-gray-400 hover:text-gray-600",
+                    ? "bg-white text-[#5465ff] shadow-sm"
+                    : "text-gray-400",
                 )}
               >
-                <MessageSquareText className="w-4 h-4" />
                 Tafsir
               </button>
             </div>

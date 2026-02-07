@@ -91,23 +91,25 @@ export default function HadistPage() {
           </motion.div>
 
           {/* Narrator Chips - Scrollable di Mobile, Wrapped di Desktop */}
-          <div className="relative">
-            <div className="flex overflow-x-auto md:flex-wrap md:justify-center gap-2 md:gap-3 px-4 pb-2 md:pb-0 scrollbar-hide no-scrollbar">
-              <div className="flex md:flex-wrap gap-2 md:justify-center w-max md:w-full max-w-4xl mx-auto p-3 md:p-4 bg-white shadow-sm rounded-2xl md:rounded-[2.5rem] border border-slate-100">
+          <div className="relative w-full max-w-5xl mx-auto">
+            {/* Kontainer Scrollable untuk Mobile */}
+            <div className="flex overflow-x-auto md:overflow-visible gap-2 px-4 pb-4 md:pb-0 no-scrollbar justify-start md:justify-center">
+              {/* Card Utama */}
+              <div className="flex flex-nowrap md:flex-wrap items-center gap-2 md:gap-3 p-3 md:p-5 bg-white shadow-sm rounded-[2rem] md:rounded-[3rem] border border-slate-100 min-w-max md:min-w-0 md:w-full justify-center">
                 {NARRATORS.map((n) => (
                   <button
                     key={n.id}
                     onClick={() => setActiveNarrator(n.id)}
                     className={cn(
-                      "px-4 py-2 md:px-5 md:py-2.5 rounded-xl md:rounded-2xl text-[10px] md:text-[11px] font-bold transition-all duration-300 border flex items-center gap-2 uppercase tracking-wider whitespace-nowrap",
+                      "px-4 py-2.5 md:px-6 md:py-3 rounded-xl md:rounded-2xl text-[10px] md:text-[12px] font-bold transition-all duration-300 border flex items-center gap-2 uppercase tracking-wider whitespace-nowrap cursor-pointer",
                       activeNarrator === n.id
-                        ? "bg-[#5465ff] text-white border-[#5465ff] shadow-lg shadow-[#5465ff]/30"
-                        : "bg-white text-slate-400 border-slate-100 hover:border-[#5465ff]/30 hover:text-[#5465ff]",
+                        ? "bg-[#5465ff] text-white border-[#5465ff] shadow-lg shadow-[#5465ff]/30 scale-105"
+                        : "bg-white text-slate-400 border-slate-100 hover:border-[#5465ff]/30 hover:text-[#5465ff] hover:bg-slate-50",
                     )}
                   >
                     <User
                       className={cn(
-                        "w-3 h-3 md:w-3.5 md:h-3.5",
+                        "w-3.5 h-3.5 md:w-4 md:h-4",
                         activeNarrator === n.id
                           ? "text-white"
                           : "text-[#5465ff]",
