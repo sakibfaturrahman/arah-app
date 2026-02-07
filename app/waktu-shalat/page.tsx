@@ -84,7 +84,7 @@ export default function JadwalSholatBulanan() {
   };
 
   const handleShareWhatsApp = () => {
-    const appUrl = "https://nalarah.my.id/waktu-sholat";
+    const appUrl = "https://nalarah.my.id/waktu-shalat";
     const text =
       `Assalamu'alaikum wr. wb. ✨\n\n` +
       `Izin berbagi *Jadwal Sholat ${userCity}* untuk bulan *${namaBulan}* (${hijriDate}).\n\n` +
