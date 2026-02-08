@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import LocationPermission from "@/components/common/locationModal";
+import { cn } from "@/lib/utils";
 
 export default function ClientLayout({
   children,
@@ -15,24 +16,32 @@ export default function ClientLayout({
 
   useEffect(() => {
     setIsMounted(true);
-    const finished = localStorage.getItem("finished-onboarding");
-    if (finished === "true") {
-      setLocked(false);
-    }
+
+    // Fungsi untuk cek status
+    const checkStatus = () => {
+      const finished = localStorage.getItem("finished-onboarding");
+      if (finished === "true") setLocked(false);
+    };
+
+    checkStatus();
+
+    // Listen event jika onboarding selesai di halaman Home
+    window.addEventListener("onboarding-finished", checkStatus);
+    return () => window.removeEventListener("onboarding-finished", checkStatus);
   }, []);
 
   return (
     <>
-      {/* Navbar & Footer HANYA muncul jika sudah Mounted dan onboarding selesai */}
       {isMounted && !locked && <Navbar />}
-
-      <main className="flex-grow pt-15 md:pt-13 overflow-x-hidden">
+      <main
+        className={cn(
+          "flex-grow overflow-x-hidden",
+          !locked && "pt-15 md:pt-13",
+        )}
+      >
         {children}
       </main>
-
       {isMounted && !locked && <Footer />}
-
-      {/* Global Location Modal */}
       <LocationPermission />
     </>
   );

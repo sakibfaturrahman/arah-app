@@ -9,12 +9,18 @@ import {
   Info,
   Maximize2,
   Milestone,
-  Box, // Digunakan sebagai representasi Ka'bah
+  Box,
 } from "lucide-react";
 import { Qibla, Coordinates } from "adhan";
 import { cn } from "@/lib/utils";
 
 const KABAH_COORDS = { lat: 21.422487, lng: 39.826206 };
+
+// ================= UTIL =================
+function angularDiff(a: number, b: number) {
+  let d = Math.abs(a - b) % 360;
+  return d > 180 ? 360 - d : d;
+}
 
 export default function ArahKiblat() {
   const [heading, setHeading] = useState(0);
@@ -27,6 +33,7 @@ export default function ArahKiblat() {
   const [isIos, setIsIos] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // ================= DISTANCE =================
   const calculateDistance = (
     lat1: number,
     lon1: number,
@@ -37,61 +44,71 @@ export default function ArahKiblat() {
     const dLat = (lat2 - lat1) * (Math.PI / 180);
     const dLon = (lon2 - lon1) * (Math.PI / 180);
     const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * (Math.PI / 180)) *
-        Math.cos(lat2 * (Math.PI / 180)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) ** 2;
+    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
   };
 
+  // ================= LOCATION =================
   const initLocation = useCallback(() => {
-    if ("geolocation" in navigator) {
-      setIsLoading(true);
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          const { latitude, longitude } = pos.coords;
-          const coords = new Coordinates(latitude, longitude);
-          const qiblaAngle = Qibla(coords);
+    if (!("geolocation" in navigator)) return;
 
-          setLocation({ lat: latitude, lng: longitude });
-          setQiblaDirection(qiblaAngle);
-          setDistance(
-            calculateDistance(
-              latitude,
-              longitude,
-              KABAH_COORDS.lat,
-              KABAH_COORDS.lng,
-            ),
+    setIsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        const coords = new Coordinates(latitude, longitude);
+        const qiblaAngle = Qibla(coords); // 0–360 dari utara
+
+        setLocation({ lat: latitude, lng: longitude });
+        setQiblaDirection(qiblaAngle);
+        setDistance(
+          calculateDistance(
+            latitude,
+            longitude,
+            KABAH_COORDS.lat,
+            KABAH_COORDS.lng,
+          ),
+        );
+
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
           );
+          const data = await res.json();
+          setAddress(data.display_name.split(",").slice(0, 3).join(","));
+        } catch {
+          setAddress("Koordinat berhasil dikunci");
+        }
 
-          try {
-            const res = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
-            );
-            const data = await res.json();
-            setAddress(data.display_name.split(",").slice(0, 3).join(","));
-          } catch (e) {
-            setAddress("Koordinat berhasil dikunci");
-          }
-          setIsLoading(false);
-        },
-        () => {
-          setAddress("Izin lokasi diperlukan");
-          setIsLoading(false);
-        },
-        { enableHighAccuracy: true },
-      );
-    }
+        setIsLoading(false);
+      },
+      () => {
+        setAddress("Izin lokasi diperlukan");
+        setIsLoading(false);
+      },
+      { enableHighAccuracy: true },
+    );
   }, []);
 
+  // ================= COMPASS =================
   useEffect(() => {
     initLocation();
+
     const handleOrientation = (e: any) => {
-      const alpha =
-        e.webkitCompassHeading || (e.alpha ? Math.abs(e.alpha - 360) : 0);
-      setHeading(alpha);
+      let compass = 0;
+
+      if (typeof e.webkitCompassHeading === "number") {
+        // iOS (paling akurat)
+        compass = e.webkitCompassHeading;
+      } else if (typeof e.alpha === "number") {
+        // Android
+        compass = (360 - e.alpha) % 360;
+      }
+
+      setHeading(compass);
     };
 
     if (
@@ -99,36 +116,51 @@ export default function ArahKiblat() {
     ) {
       setIsIos(true);
     } else {
-      window.addEventListener("deviceorientation", handleOrientation, true);
+      window.addEventListener(
+        "deviceorientationabsolute",
+        handleOrientation,
+        true,
+      );
     }
-    return () =>
-      window.removeEventListener("deviceorientation", handleOrientation);
+
+    return () => {
+      window.removeEventListener(
+        "deviceorientationabsolute",
+        handleOrientation,
+      );
+    };
   }, [initLocation]);
 
-  const requestPermission = () => {
-    (DeviceOrientationEvent as any).requestPermission().then((res: string) => {
-      if (res === "granted") {
-        window.addEventListener(
-          "deviceorientation",
-          (e: any) => setHeading(e.webkitCompassHeading),
-          true,
-        );
-        setIsIos(false);
-      }
-    });
+  // ================= iOS PERMISSION =================
+  const requestPermission = async () => {
+    const res = await (DeviceOrientationEvent as any).requestPermission();
+    if (res === "granted") {
+      window.addEventListener(
+        "deviceorientation",
+        (e: any) => {
+          if (typeof e.webkitCompassHeading === "number") {
+            setHeading(e.webkitCompassHeading);
+          }
+        },
+        true,
+      );
+      setIsIos(false);
+    }
   };
 
+  // ================= ALIGN CHECK =================
   const diff =
-    qiblaDirection !== null ? Math.abs((heading % 360) - qiblaDirection) : 100;
+    qiblaDirection !== null ? angularDiff(heading, qiblaDirection) : 999;
   const isAligned = diff < 2;
 
+  // ================= UI (DARI AWAL) =================
   return (
-    <div className="min-h-screen bg-[#FDFDFD] flex flex-col items-center pt-16 pb-12 px-6 font-sans text-slate-900">
-      {/* --- HEADER --- */}
-      <div className="w-full max-w-md text-center mb-10">
+    <div className="min-h-screen bg-gradient-to-b from-[#FDFDFD] to-[#F9F9F9] flex flex-col items-center pt-16 pb-12 px-6 font-sans text-slate-900">
+      <div className="w-full max-w-md text-center mb-10 mt-6">
         <motion.div
           initial={{ y: -10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.4 }}
           className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100 mb-4"
         >
           <ShieldCheck className="w-3.5 h-3.5" />
@@ -136,16 +168,31 @@ export default function ArahKiblat() {
             Akurasi GPS Aktif
           </span>
         </motion.div>
-        <h1 className="text-3xl font-black tracking-tight text-slate-900 mb-2">
+        <motion.h1
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-4xl font-black tracking-tight text-slate-900 mb-2"
+        >
           Kiblat<span className="text-[#5465ff]">Finder</span>
-        </h1>
-        <p className="text-sm text-slate-500 font-medium">
+        </motion.h1>
+        <motion.p
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="text-sm text-slate-500 font-medium"
+        >
           Arah presisi menuju Ka&apos;bah Makkah
-        </p>
+        </motion.p>
       </div>
 
       {/* --- COMPASS UI --- */}
-      <div className="relative w-80 h-80 flex items-center justify-center mb-12">
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        className="relative w-80 h-80 flex items-center justify-center mb-12"
+      >
         {/* Glow saat sejajar (Aligned) */}
         <AnimatePresence>
           {isAligned && (
@@ -221,78 +268,117 @@ export default function ArahKiblat() {
 
         {/* Poros Tengah (Pivot) */}
         <div className="absolute w-5 h-5 bg-white rounded-full border-[5px] border-slate-900 z-20 shadow-sm" />
-      </div>
+      </motion.div>
 
       {/* --- INFO CARDS --- */}
       <div className="w-full max-w-md space-y-4">
-        {isIos && (
-          <button
-            onClick={requestPermission}
-            className="w-full py-4 bg-[#5465ff] text-white rounded-2xl font-bold text-sm shadow-lg shadow-blue-200 flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
-          >
-            <Maximize2 className="w-4 h-4" /> Aktifkan Sensor iPhone
-          </button>
-        )}
+        <AnimatePresence>
+          {isIos && (
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+              onClick={requestPermission}
+              className="w-full py-4 bg-gradient-to-r from-[#5465ff] to-[#4353ff] text-white rounded-2xl font-bold text-sm shadow-lg hover:shadow-xl hover:from-[#4353ff] hover:to-[#374bff] flex items-center justify-center gap-3 active:scale-[0.98] transition-all cursor-pointer"
+            >
+              <Maximize2 className="w-4 h-4" /> Aktifkan Sensor iPhone
+            </motion.button>
+          )}
+        </AnimatePresence>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm transition-all hover:border-[#5465ff]/20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            whileHover={{ y: -4 }}
+            className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all"
+          >
             <div className="flex items-center gap-2 mb-3">
-              <div className="p-1.5 bg-blue-50 rounded-lg">
-                <Target className="w-3.5 h-3.5 text-[#5465ff]" />
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <Target className="w-4 h-4 text-[#5465ff]" />
               </div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
                 Arah Kiblat
               </span>
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-black text-slate-900">
+              <motion.span
+                key={qiblaDirection}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-2xl font-black text-slate-900"
+              >
                 {qiblaDirection?.toFixed(1) || "--"}
-              </span>
+              </motion.span>
               <span className="text-sm font-bold text-[#5465ff]">°</span>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm transition-all hover:border-emerald-100">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            whileHover={{ y: -4 }}
+            className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all"
+          >
             <div className="flex items-center gap-2 mb-3">
-              <div className="p-1.5 bg-emerald-50 rounded-lg">
-                <Milestone className="w-3.5 h-3.5 text-emerald-500" />
+              <div className="p-2 bg-emerald-50 rounded-lg">
+                <Milestone className="w-4 h-4 text-emerald-500" />
               </div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
                 Jarak
               </span>
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-black text-slate-900">
+              <motion.span
+                key={distance}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-2xl font-black text-slate-900"
+              >
                 {distance ? Math.round(distance).toLocaleString("id-ID") : "--"}
-              </span>
+              </motion.span>
               <span className="text-sm font-bold text-emerald-500">KM</span>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Info Lokasi Detil */}
-        <div className="bg-slate-50 border border-slate-100 p-5 rounded-3xl flex items-center gap-4">
-          <div className="h-10 w-10 rounded-2xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          whileHover={{ y: -2 }}
+          className="bg-white border border-slate-100 p-5 rounded-2xl flex items-center gap-4 shadow-sm hover:shadow-md transition-all"
+        >
+          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
             <MapPin className="w-5 h-5 text-[#5465ff]" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-0.5">
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-ellipsis overflow-hidden">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">
                 Lokasi Terkunci
               </span>
               {isLoading && (
-                <RefreshCw className="w-2.5 h-2.5 animate-spin text-[#5465ff]" />
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                >
+                  <RefreshCw className="w-3 h-3 text-[#5465ff]" />
+                </motion.div>
               )}
             </div>
             <p className="text-xs font-bold text-slate-700 truncate">
               {address}
             </p>
-            <div className="flex gap-3 mt-1.5">
+            <div className="flex gap-4 mt-2">
               <div className="flex items-center gap-1">
                 <span className="text-[8px] font-bold text-slate-300 uppercase">
                   Lat
                 </span>
-                <span className="text-[9px] font-mono font-bold text-slate-500">
+                <span className="text-[9px] font-mono font-bold text-slate-600">
                   {location?.lat.toFixed(5)}
                 </span>
               </div>
@@ -300,24 +386,27 @@ export default function ArahKiblat() {
                 <span className="text-[8px] font-bold text-slate-300 uppercase">
                   Lng
                 </span>
-                <span className="text-[9px] font-mono font-bold text-slate-500">
+                <span className="text-[9px] font-mono font-bold text-slate-600">
                   {location?.lng.toFixed(5)}
                 </span>
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Panduan Kalibrasi */}
-        <div className="flex items-start gap-3 px-2">
-          <div className="mt-1">
-            <Info className="w-3.5 h-3.5 text-slate-300" />
-          </div>
-          <p className="text-[10px] font-medium text-slate-400 leading-relaxed">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.25 }}
+          className="flex items-start gap-3 px-2 py-3 bg-slate-50 rounded-xl border border-slate-100"
+        >
+          <Info className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+          <p className="text-[10px] font-medium text-slate-600 leading-relaxed">
             Letakkan perangkat di permukaan yang rata. Jauhkan dari benda logam
             atau medan magnet besar untuk hasil yang akurat.
           </p>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

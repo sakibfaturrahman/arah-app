@@ -12,27 +12,22 @@ export default function Home() {
 
   useEffect(() => {
     const finished = localStorage.getItem("finished-onboarding");
-    setShowWelcome(!finished);
+    setShowWelcome(finished !== "true");
   }, []);
 
   const handleComplete = () => {
     localStorage.setItem("finished-onboarding", "true");
     setShowWelcome(false);
+    // Beritahu ClientLayout agar memunculkan Navbar/Footer
+    window.dispatchEvent(new Event("onboarding-finished"));
   };
 
-  // ⛔ BENAR-BENAR JANGAN RENDER APA PUN
   if (showWelcome === null) return null;
 
-  // 🧠 SELAMA ONBOARDING → HANYA ONBOARDING
   if (showWelcome) {
-    return (
-      <AnimatePresence mode="wait">
-        <Onboarding onComplete={handleComplete} />
-      </AnimatePresence>
-    );
+    return <Onboarding onComplete={handleComplete} />;
   }
 
-  // ✅ BARU RENDER APLIKASI SETELAH SELESAI
   return (
     <main className="flex-grow pt-4 md:pt-28 pb-32 bg-[#fafafa]">
       <div className="max-w-screen-md mx-auto px-4 md:px-6">
