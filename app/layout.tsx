@@ -65,7 +65,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${montserrat.variable} ${onest.variable} font-sans antialiased bg-[#fafafa] text-gray-900 flex flex-col min-h-screen`}
+        className={`${montserrat.variable} ${onest.variable} font-sans antialiased bg-[#fafafa] text-gray-900 flex flex-col min-h-screen mt-4`}
       >
         <ClientLayout>{children}</ClientLayout>
       </body>

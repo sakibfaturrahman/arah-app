@@ -5,7 +5,7 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { InstallPWA } from "@/components/installPwa"; // Pastikan path ini benar
+import { InstallPWA } from "@/components/installPwa"; // Path sudah disesuaikan
 
 export default function ClientLayout({
   children,
@@ -20,7 +20,7 @@ export default function ClientLayout({
 
     const checkStatus = () => {
       const finished = localStorage.getItem("finished-onboarding");
-      if (finished === "true") setLocked(false);
+      if (finished === "true") setLocked(false); // Logika onboarding tetap dipertahankan
     };
 
     checkStatus();
@@ -39,6 +39,7 @@ export default function ClientLayout({
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
+            className="fixed top-0 left-0 right-0 z-[50]" // Navbar dibuat fixed agar tidak tertutup konten
           >
             <Navbar />
           </motion.div>
@@ -48,10 +49,15 @@ export default function ClientLayout({
       <main
         className={cn(
           "flex-grow overflow-x-hidden transition-all duration-500",
-          !locked && "pt-15 md:pt-13",
+          // Penyesuaian padding-top agar konten memiliki jarak yang cukup dari Navbar
+          !locked ? "pt-15 md:pt-15" : "pt-0",
         )}
       >
-        {children}
+        <div className={cn(!locked && "px-4 md:px-6")}>
+          {" "}
+          {/* Opsional: Tambahkan padding horizontal agar tidak mepet ke pinggir layar */}
+          {children}
+        </div>
       </main>
 
       {/* Footer hanya muncul jika onboarding selesai */}
@@ -66,10 +72,7 @@ export default function ClientLayout({
         )}
       </AnimatePresence>
 
-      {/* PWA Install Prompt: 
-         Hanya muncul jika user sudah menyelesaikan onboarding 
-         agar tidak menumpuk dengan UI perkenalan aplikasi.
-      */}
+      {/* PWA Install Prompt hanya muncul setelah onboarding */}
       {!locked && <InstallPWA />}
     </>
   );

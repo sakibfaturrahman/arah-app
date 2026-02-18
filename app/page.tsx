@@ -48,17 +48,21 @@ export default function Home() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="flex-grow pb-32 bg-[#fafafa]"
+          // PERBAIKAN: Tambahkan padding top di sini untuk memberi jarak dari Navbar
+          className="flex-grow pb-32 bg-[#fafafa] pt-18 md:pt-24"
         >
-          <div className="max-w-screen-md mx-auto px-4 md:px-6 pt-4 md:pt-10">
-            <div className="flex flex-col space-y-6 mt-4">
+          <div className="max-w-screen-md mx-auto px-4 md:px-6">
+            <div className="flex flex-col space-y-8">
+              {/* Greeting Section */}
               <Greeting />
 
-              <section className="w-full space-y-4">
+              {/* Prayer & Info Section */}
+              <section className="w-full space-y-6">
                 <HeroSection />
                 <PrayerTimeTable />
               </section>
 
+              {/* Progress/History Section */}
               <section className="w-full">
                 <LastRead />
               </section>
