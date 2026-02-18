@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
-import LocationPermission from "@/components/common/locationModal";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function ClientLayout({
   children,
@@ -17,7 +17,6 @@ export default function ClientLayout({
   useEffect(() => {
     setIsMounted(true);
 
-    // Fungsi untuk cek status
     const checkStatus = () => {
       const finished = localStorage.getItem("finished-onboarding");
       if (finished === "true") setLocked(false);
@@ -25,24 +24,45 @@ export default function ClientLayout({
 
     checkStatus();
 
-    // Listen event jika onboarding selesai di halaman Home
     window.addEventListener("onboarding-finished", checkStatus);
     return () => window.removeEventListener("onboarding-finished", checkStatus);
   }, []);
 
+  if (!isMounted) return null;
+
   return (
     <>
-      {isMounted && !locked && <Navbar />}
+      {/* Navbar & Footer hanya muncul jika onboarding selesai */}
+      <AnimatePresence>
+        {!locked && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Navbar />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <main
         className={cn(
-          "flex-grow overflow-x-hidden",
+          "flex-grow overflow-x-hidden transition-all duration-500",
           !locked && "pt-15 md:pt-13",
         )}
       >
         {children}
       </main>
-      {isMounted && !locked && <Footer />}
-      <LocationPermission />
+
+      <AnimatePresence>
+        {!locked && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Footer />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

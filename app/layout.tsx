@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Montserrat, Onest } from "next/font/google";
 import "@/styles/globals.css";
-import ClientLayout from "./client-layout"; // Kita akan buat file ini
+import ClientLayout from "./client-layout";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -55,10 +55,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id">
+      <head>
+        {/* Leaflet CSS dimasukkan di sini untuk menghindari CSS Parsing Error di Tailwind v4 */}
+        <link
+          rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossOrigin=""
+        />
+      </head>
       <body
         className={`${montserrat.variable} ${onest.variable} font-sans antialiased bg-[#fafafa] text-gray-900 flex flex-col min-h-screen`}
       >
-        {/* Pindahkan logika client-side (Onboarding/Navbar) ke sini */}
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>

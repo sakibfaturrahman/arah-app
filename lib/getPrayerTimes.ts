@@ -15,6 +15,10 @@ export interface PrayerData {
       year: string;
     };
     readable: string;
+    gregorian?: {
+      day: string;
+      weekday: { en: string };
+    };
   };
 }
 
@@ -30,11 +34,11 @@ const FALLBACK_PRAYER: PrayerData = {
   },
   date: {
     hijri: {
-      day: "18",
+      day: "29",
       month: { en: "Sha'ban", ar: "شَعْبَان" },
       year: "1447",
     },
-    readable: "06 Feb 2026",
+    readable: "17 Feb 2026",
   },
 };
 
@@ -47,6 +51,9 @@ export const PRAYER_LIST = [
   { key: "Isha", label: "Isya" },
 ];
 
+/**
+ * Mendapatkan Jadwal Sholat Harian
+ */
 export async function getPrayerTimes(): Promise<PrayerData | null> {
   if (typeof window === "undefined") return null;
 
@@ -56,42 +63,60 @@ export async function getPrayerTimes(): Promise<PrayerData | null> {
   try {
     const { lat, lng } = JSON.parse(savedLoc);
 
-    // Tambahkan timeout 5 detik agar tidak "hanging"
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 detik timeout
 
     const response = await fetch(
-      `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=11`, // Method 11 adalah Kemenag RI
+      `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=11`,
       { signal: controller.signal },
     );
 
     clearTimeout(timeoutId);
 
-    if (!response.ok) throw new Error("Server response error");
+    if (!response.ok) throw new Error("API Server Error");
 
     const result = await response.json();
     return result.data;
   } catch (error) {
-    console.warn("Using fallback prayer times due to fetch failure.");
-    // Jika gagal fetch, kita kembalikan data cadangan agar UI tetap muncul
+    console.warn("Gagal mengambil jadwal harian, menggunakan fallback.");
     return FALLBACK_PRAYER;
   }
 }
-export async function getMonthlyPrayerTimes(month: number, year: number) {
+
+/**
+ * Mendapatkan Jadwal Sholat Bulanan
+ */
+export async function getMonthlyPrayerTimes(
+  month: number,
+  year: number,
+): Promise<any[] | null> {
   if (typeof window === "undefined") return null;
+
   const savedLoc = localStorage.getItem("user-location");
   if (!savedLoc) return null;
 
   try {
     const { lat, lng } = JSON.parse(savedLoc);
-    // Method 11 untuk Kemenag RI
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 detik timeout
+
     const response = await fetch(
       `https://api.aladhan.com/v1/calendar?latitude=${lat}&longitude=${lng}&method=11&month=${month}&year=${year}`,
+      { signal: controller.signal },
     );
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) throw new Error("Monthly API Error");
+
     const result = await response.json();
-    return result.data;
+
+    // Pastikan mengembalikan array (result.data) agar tidak error saat di-.map()
+    return Array.isArray(result.data) ? result.data : [];
   } catch (error) {
-    console.error("Error fetching monthly prayer times:", error);
-    return null;
+    console.error("Gagal mengambil jadwal bulanan:", error);
+    // Kembalikan array kosong daripada null agar UI tidak TypeError
+    return [];
   }
 }

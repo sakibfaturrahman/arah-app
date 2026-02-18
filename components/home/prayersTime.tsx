@@ -13,12 +13,12 @@ import {
   Sunset,
   Moon,
   Coffee,
+  AlertCircle,
 } from "lucide-react";
 import { getPrayerTimes, PRAYER_LIST } from "@/lib/getPrayerTimes";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
-// Pemetaan Ikon Berdasarkan Waktu Shalat
 const PRAYER_ICONS: Record<string, any> = {
   Imsak: Coffee,
   Fajr: Sunrise,
@@ -35,13 +35,20 @@ export default function PrayerTimeTable() {
   const [mounted, setMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  // State untuk melacak apakah browser mengizinkan audio
+  const [isAudioAllowed, setIsAudioAllowed] = useState(true);
+
   const adzanRegularRef = useRef<HTMLAudioElement | null>(null);
   const adzanSubuhRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
-    adzanRegularRef.current = new Audio("/adzan/adzan.mp3");
-    adzanSubuhRef.current = new Audio("/adzan/adzan-shubuh.mp3");
+
+    // Inisialisasi Audio
+    if (!adzanRegularRef.current)
+      adzanRegularRef.current = new Audio("/adzan/adzan.mp3");
+    if (!adzanSubuhRef.current)
+      adzanSubuhRef.current = new Audio("/adzan/adzan-shubuh.mp3");
 
     async function loadData() {
       const data = await getPrayerTimes();
@@ -59,45 +66,63 @@ export default function PrayerTimeTable() {
 
       if (timings) {
         checkActivePrayer(timings);
-        handleAutoAdzan(timeStr, timings);
+        // Jalankan auto adzan hanya pada detik 00 agar tidak re-trigger dalam satu menit
+        if (now.getSeconds() === 0) {
+          handleAutoAdzan(timeStr, timings);
+        }
       }
     }, 1000);
 
-    return () => {
-      clearInterval(interval);
-      adzanRegularRef.current?.pause();
-      adzanSubuhRef.current?.pause();
-    };
+    return () => clearInterval(interval);
   }, [timings]);
+
+  // Fungsi untuk "memancing" izin autoplay dari browser
+  const enableAudio = () => {
+    setIsMuted(false);
+    // Memutar audio kosong/sejenak untuk membuka kunci audio browser
+    adzanRegularRef.current
+      ?.play()
+      .then(() => {
+        adzanRegularRef.current?.pause();
+        setIsAudioAllowed(true);
+      })
+      .catch(() => setIsAudioAllowed(false));
+  };
 
   const handleAutoAdzan = (timeStr: string, prayerTimings: any) => {
     if (isMuted) return;
+
     if (prayerTimings.Fajr === timeStr) {
-      adzanSubuhRef.current?.play().catch(() => console.log("Blocked"));
+      adzanSubuhRef.current?.play().catch((err) => {
+        console.log("Autoplay diblokir browser:", err);
+        setIsAudioAllowed(false);
+      });
       return;
     }
+
     const otherPrayers = ["Dhuhr", "Asr", "Maghrib", "Isha"];
     if (otherPrayers.some((key) => prayerTimings[key] === timeStr)) {
-      adzanRegularRef.current?.play().catch(() => console.log("Blocked"));
+      adzanRegularRef.current?.play().catch((err) => {
+        console.log("Autoplay diblokir browser:", err);
+        setIsAudioAllowed(false);
+      });
     }
   };
 
+  // ... (checkActivePrayer & getPrayerStatus tetap sama seperti kode Anda) ...
   const checkActivePrayer = (data: any) => {
     const now = new Date();
     const currentMins = now.getHours() * 60 + now.getMinutes();
     let currentActive = "";
-
     for (let i = 0; i < PRAYER_LIST.length; i++) {
       const [h, m] = data[PRAYER_LIST[i].key].split(":").map(Number);
       const prayerMins = h * 60 + m;
       const nextPrayerObj = PRAYER_LIST[i + 1];
       let nextMins = 1440;
-
       if (nextPrayerObj) {
         const [nh, nm] = data[nextPrayerObj.key].split(":").map(Number);
         nextMins = nh * 60 + nm;
       }
-
       if (currentMins >= prayerMins && currentMins < nextMins) {
         currentActive = PRAYER_LIST[i].key;
         break;
@@ -111,10 +136,8 @@ export default function PrayerTimeTable() {
     const [h, m] = prayerTime.split(":").map(Number);
     const prayerDate = new Date();
     prayerDate.setHours(h, m, 0);
-
     const diffInMs = currentTime.getTime() - prayerDate.getTime();
     const diffInMins = Math.floor(diffInMs / 60000);
-
     if (diffInMins === 0)
       return {
         label: "Sekarang",
@@ -125,7 +148,6 @@ export default function PrayerTimeTable() {
         label: `${diffInMins}m lalu`,
         color: "text-amber-500 bg-amber-50",
       };
-
     return null;
   };
 
@@ -133,7 +155,31 @@ export default function PrayerTimeTable() {
 
   return (
     <div className="w-full space-y-6 mt-5">
-      {/* Header Section */}
+      {/* Alert Jika Audio Belum Diizinkan */}
+      <AnimatePresence>
+        {!isAudioAllowed && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mx-4 md:mx-0 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between gap-3"
+          >
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-500" />
+              <p className="text-xs font-medium text-amber-800">
+                Browser membatasi suara otomatis. Klik aktifkan untuk mendengar
+                Adzan.
+              </p>
+            </div>
+            <button
+              onClick={enableAudio}
+              className="px-4 py-2 bg-amber-500 text-white text-[10px] font-bold uppercase rounded-xl"
+            >
+              Aktifkan
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 md:px-0">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-[#5465ff]/10 rounded-2xl">
@@ -144,18 +190,21 @@ export default function PrayerTimeTable() {
               Jadwal Shalat
             </h2>
             <p className="text-xs text-slate-400 mt-1 font-medium tracking-wide uppercase">
-              Waktu setempat • Metode Kemenag RI
+              Waktu setempat
             </p>
           </div>
         </div>
 
         <button
-          onClick={() => setIsMuted(!isMuted)}
+          onClick={() => {
+            if (isMuted) enableAudio();
+            else setIsMuted(true);
+          }}
           className={cn(
             "flex items-center justify-center gap-2 px-6 py-3 rounded-2xl transition-all text-xs font-bold uppercase tracking-widest",
             isMuted
               ? "bg-slate-100 text-slate-400 border border-slate-200"
-              : "bg-[#5465ff] text-white shadow-lg shadow-[#5465ff]/20 hover:scale-105 active:scale-95",
+              : "bg-[#5465ff] text-white shadow-lg",
           )}
         >
           {isMuted ? (
@@ -167,7 +216,6 @@ export default function PrayerTimeTable() {
         </button>
       </div>
 
-      {/* Grid Layout: 2 Kolom di Mobile, 3 Kolom di Tablet/Desktop */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5 px-4 md:px-0">
         {PRAYER_LIST.map((prayer) => {
           const isActive = activePrayer === prayer.key;
@@ -177,38 +225,31 @@ export default function PrayerTimeTable() {
           return (
             <motion.div
               key={prayer.key}
-              initial={false}
               animate={isActive ? { scale: 1.02 } : { scale: 1 }}
               className={cn(
                 "relative group flex flex-col p-5 rounded-[2rem] border transition-all duration-500 overflow-hidden",
                 isActive
-                  ? "bg-white border-[#5465ff] shadow-xl shadow-[#5465ff]/10 ring-1 ring-[#5465ff]/30"
-                  : "bg-white/40 backdrop-blur-sm border-slate-100 hover:bg-white hover:border-slate-200",
+                  ? "bg-white border-[#5465ff] shadow-xl"
+                  : "bg-white/40 backdrop-blur-sm border-slate-100",
               )}
             >
-              {/* Floating Decoration for Active Card */}
-              {isActive && (
-                <div className="absolute -top-4 -right-4 w-20 h-20 bg-[#5465ff]/5 rounded-full blur-2xl" />
-              )}
-
               <div className="flex items-start justify-between mb-6">
                 <div
                   className={cn(
-                    "p-3 rounded-2xl transition-all duration-500",
+                    "p-3 rounded-2xl",
                     isActive
-                      ? "bg-[#5465ff] text-white shadow-lg shadow-[#5465ff]/30 rotate-3"
-                      : "bg-slate-50 text-slate-400 border border-slate-100",
+                      ? "bg-[#5465ff] text-white"
+                      : "bg-slate-50 text-slate-400",
                   )}
                 >
                   <Icon
                     className={cn("w-6 h-6", isActive && "animate-pulse")}
                   />
                 </div>
-
                 {status && (
                   <span
                     className={cn(
-                      "text-[9px] font-bold uppercase tracking-tighter px-2 py-1 rounded-lg border border-transparent",
+                      "text-[9px] font-bold uppercase tracking-tighter px-2 py-1 rounded-lg",
                       status.color,
                     )}
                   >
@@ -216,11 +257,10 @@ export default function PrayerTimeTable() {
                   </span>
                 )}
               </div>
-
               <div className="mt-auto space-y-1">
                 <h3
                   className={cn(
-                    "text-[10px] font-bold uppercase tracking-[0.2em] transition-colors",
+                    "text-[10px] font-bold uppercase tracking-[0.2em]",
                     isActive ? "text-[#5465ff]" : "text-slate-400",
                   )}
                 >
@@ -229,7 +269,7 @@ export default function PrayerTimeTable() {
                 <div className="flex items-center gap-2">
                   <span
                     className={cn(
-                      "text-3xl sm:text-4xl font-bold font-mono tracking-tighter transition-all",
+                      "text-3xl sm:text-4xl font-bold font-mono tracking-tighter",
                       isActive ? "text-slate-900" : "text-slate-600",
                     )}
                   >
@@ -240,14 +280,6 @@ export default function PrayerTimeTable() {
                   )}
                 </div>
               </div>
-
-              {/* Watermark Background Ikon Shalat */}
-              <Icon
-                className={cn(
-                  "absolute -bottom-4 -right-4 w-24 h-24 transition-all duration-700 opacity-[0.03] group-hover:scale-110 group-hover:rotate-6",
-                  isActive ? "opacity-[0.08] text-[#5465ff]" : "text-slate-900",
-                )}
-              />
             </motion.div>
           );
         })}

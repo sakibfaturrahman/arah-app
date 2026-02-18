@@ -13,6 +13,7 @@ import {
   ArrowRightLeft,
   X,
   Sparkles,
+  RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
 import { getMonthlyPrayerTimes, PRAYER_LIST } from "@/lib/getPrayerTimes";
@@ -27,6 +28,7 @@ export default function JadwalSholatBulanan() {
   const [userCity, setUserCity] = useState<string>("");
   const [hijriDate, setHijriDate] = useState<string>("");
   const [showScrollHint, setShowScrollHint] = useState(false);
+  const [isRefreshingLocation, setIsRefreshingLocation] = useState(false);
 
   const now = new Date();
   const currentDay = now.getDate();
@@ -72,6 +74,61 @@ export default function JadwalSholatBulanan() {
     }
     loadData();
   }, []);
+
+  const handleRefreshLocation = async () => {
+    try {
+      if (!navigator.geolocation) {
+        alert("Geolocation tidak didukung oleh browser Anda");
+        return;
+      }
+
+      setIsRefreshingLocation(true);
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude: lat, longitude: lng } = position.coords;
+
+          // Simpan ke localStorage
+          localStorage.setItem("user-location", JSON.stringify({ lat, lng }));
+
+          // Ambil alamat dari geolocation API
+          try {
+            const geoRes = await fetch(
+              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=id`,
+            );
+            const geoData = await geoRes.json();
+            const city = geoData.city || geoData.locality || "Lokasi Aktif";
+            setFullAddress(
+              `${geoData.locality}, ${geoData.city}, ${geoData.principalSubdivision}`,
+            );
+            setUserCity(city);
+
+            // Reload jadwal sholat dengan lokasi baru
+            const month = now.getMonth() + 1;
+            const year = now.getFullYear();
+            const data = await getMonthlyPrayerTimes(month, year);
+            if (data) setSchedule(data);
+          } catch (e) {
+            setUserCity("Lokasi Aktif");
+            console.error("Error fetching geolocation:", e);
+          } finally {
+            setIsRefreshingLocation(false);
+          }
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          alert(
+            "Gagal mendapatkan lokasi. Pastikan Anda memberikan izin lokasi.",
+          );
+          setIsRefreshingLocation(false);
+        },
+      );
+    } catch (e) {
+      console.error("Error:", e);
+      alert("Terjadi kesalahan saat memperbarui lokasi");
+      setIsRefreshingLocation(false);
+    }
+  };
 
   const handleDownloadPDF = async () => {
     await generatePrayerSchedulePDF({
@@ -181,12 +238,30 @@ export default function JadwalSholatBulanan() {
                   <div className="p-3 bg-blue-50 rounded-2xl">
                     <MapPin className="w-5 h-5 text-[#5465ff]" />
                   </div>
-                  <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      Wilayah Anda
-                    </p>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        Wilayah Anda
+                      </p>
+
+                      {/* BUTTON REFRESH VISUAL */}
+                      <button
+                        onClick={handleRefreshLocation}
+                        disabled={isRefreshingLocation}
+                        className="p-1.5 bg-slate-50 rounded-lg text-slate-400 hover:text-[#5465ff] hover:bg-blue-50 transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                        title="Perbarui Lokasi"
+                      >
+                        <RefreshCw
+                          className={cn(
+                            "w-3 h-3",
+                            isRefreshingLocation && "animate-spin",
+                          )}
+                        />
+                      </button>
+                    </div>
+
                     <p className="text-sm font-bold text-slate-800 line-clamp-2">
-                      {userCity}
+                      {fullAddress || "Mencari Lokasi..."}
                     </p>
                   </div>
                 </div>

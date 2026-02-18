@@ -1,6 +1,7 @@
 "use client";
+
 import { useState, useEffect } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Onboarding from "@/components/onboarding";
 import Greeting from "@/components/home/greeting";
 import HeroSection from "@/components/home/hero";
@@ -16,32 +17,55 @@ export default function Home() {
   }, []);
 
   const handleComplete = () => {
+    // 1. Simpan di storage
     localStorage.setItem("finished-onboarding", "true");
-    setShowWelcome(false);
-    // Beritahu ClientLayout agar memunculkan Navbar/Footer
+
+    // 2. Beritahu layout untuk unlock Navbar/Footer
     window.dispatchEvent(new Event("onboarding-finished"));
+
+    // 3. Update state lokal untuk switch tampilan
+    setShowWelcome(false);
   };
 
+  // Cegah Hydration Mismatch
   if (showWelcome === null) return null;
 
-  if (showWelcome) {
-    return <Onboarding onComplete={handleComplete} />;
-  }
-
   return (
-    <main className="flex-grow pt-4 md:pt-28 pb-32 bg-[#fafafa]">
-      <div className="max-w-screen-md mx-auto px-4 md:px-6">
-        <div className="flex flex-col space-y-4">
-          <Greeting />
-          <section className="w-full">
-            <HeroSection />
-            <PrayerTimeTable />
-          </section>
-          <section className="w-full">
-            <LastRead />
-          </section>
-        </div>
-      </div>
-    </main>
+    <AnimatePresence mode="wait">
+      {showWelcome ? (
+        <motion.div
+          key="onboarding-screen"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.4 }}
+          className="fixed inset-0 z-[9999]"
+        >
+          <Onboarding onComplete={handleComplete} />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="main-app-content"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="flex-grow pb-32 bg-[#fafafa]"
+        >
+          <div className="max-w-screen-md mx-auto px-4 md:px-6 pt-4 md:pt-10">
+            <div className="flex flex-col space-y-6 mt-4">
+              <Greeting />
+
+              <section className="w-full space-y-4">
+                <HeroSection />
+                <PrayerTimeTable />
+              </section>
+
+              <section className="w-full">
+                <LastRead />
+              </section>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
