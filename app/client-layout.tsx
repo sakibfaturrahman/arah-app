@@ -5,6 +5,7 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
+import { InstallPWA } from "@/components/installPwa"; // Pastikan path ini benar
 
 export default function ClientLayout({
   children,
@@ -32,7 +33,7 @@ export default function ClientLayout({
 
   return (
     <>
-      {/* Navbar & Footer hanya muncul jika onboarding selesai */}
+      {/* Navbar hanya muncul jika onboarding selesai */}
       <AnimatePresence>
         {!locked && (
           <motion.div
@@ -53,6 +54,7 @@ export default function ClientLayout({
         {children}
       </main>
 
+      {/* Footer hanya muncul jika onboarding selesai */}
       <AnimatePresence>
         {!locked && (
           <motion.div
@@ -63,6 +65,12 @@ export default function ClientLayout({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* PWA Install Prompt: 
+         Hanya muncul jika user sudah menyelesaikan onboarding 
+         agar tidak menumpuk dengan UI perkenalan aplikasi.
+      */}
+      {!locked && <InstallPWA />}
     </>
   );
 }
