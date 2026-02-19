@@ -25,7 +25,6 @@ export default function IntegratedGreeting() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // LOGIC (Tetap sama sesuai permintaan)
   const fetchLocationName = useCallback(async () => {
     const savedLoc = localStorage.getItem("user-location");
     if (savedLoc) {
@@ -107,75 +106,55 @@ export default function IntegratedGreeting() {
       return {
         text: "Selamat Pagi",
         icon: <Sun className="text-amber-500" />,
-        theme: "from-amber-50 to-white",
       };
     if (hours >= 11 && hours < 15)
       return {
         text: "Selamat Siang",
         icon: <CloudSun className="text-orange-400" />,
-        theme: "from-blue-50 to-white",
       };
     if (hours >= 15 && hours < 18)
       return {
         text: "Selamat Sore",
         icon: <SunMoon className="text-orange-500" />,
-        theme: "from-orange-50 to-white",
       };
     return {
       text: "Selamat Malam",
       icon: <Moon className="text-indigo-400" />,
-      theme: "from-slate-900 to-slate-800",
     };
   };
 
-  const { text, icon, theme } = getGreeting();
-  const isNight = hours >= 18 || hours < 5;
+  const { text, icon } = getGreeting();
 
   return (
     <motion.section
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className={cn(
-        "relative w-full min-h-[500px] pt-12 pb-20 overflow-hidden transition-colors duration-1000",
-        isNight ? "bg-slate-950" : "bg-white",
-      )}
+      /* Background tetap putih */
+      className="relative w-full min-h-[500px] pt-12 pb-20 overflow-hidden bg-white transition-colors duration-1000"
     >
-      {/* Soft Background Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_top,_var(--tw-gradient-from)_0%,_transparent_70%)] from-blue-500/10 pointer-events-none" />
+      {/* Background Glow tetap biru lembut */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_top,_rgba(84,101,255,0.08)_0%,_transparent_70%)] pointer-events-none" />
 
       <div className="relative z-10 px-6 max-w-lg mx-auto flex flex-col items-center">
         {/* Header: Greeting & Location */}
         <div className="w-full flex justify-between items-start mb-10">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span
-                className={cn(
-                  "text-[11px] font-bold uppercase tracking-[0.2em]",
-                  isNight ? "text-slate-400" : "text-slate-500",
-                )}
-              >
+              {/* Teks tetap abu-abu gelap */}
+              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
                 {text}
               </span>
               <div className="w-1.5 h-1.5 rounded-full bg-[#5465ff] animate-pulse" />
             </div>
-            <h2
-              className={cn(
-                "text-2xl font-bold tracking-tight",
-                isNight ? "text-white" : "text-slate-900",
-              )}
-            >
+            {/* Judul tetap hitam */}
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900">
               Assalamu’alaikum<span className="text-[#5465ff]">.</span>
             </h2>
           </div>
 
           <button
             onClick={handleUpdateLocation}
-            className={cn(
-              "flex items-center gap-2 py-2 px-3 rounded-2xl border transition-all active:scale-95",
-              isNight
-                ? "bg-slate-900/50 border-slate-800 text-slate-300"
-                : "bg-slate-50 border-slate-100 text-slate-600",
-            )}
+            className="flex items-center gap-2 py-2 px-3 rounded-2xl border transition-all active:scale-95 bg-slate-50 border-slate-100 text-slate-600"
           >
             <MapPin className="w-3.5 h-3.5 text-[#5465ff]" />
             <span className="text-[10px] font-bold truncate max-w-[80px] uppercase tracking-wider">
@@ -195,10 +174,8 @@ export default function IntegratedGreeting() {
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className={cn(
-              "text-8xl font-black tracking-tighter tabular-nums mb-2",
-              isNight ? "text-white" : "text-slate-900",
-            )}
+            /* Jam tetap gelap */
+            className="text-8xl font-black tracking-tighter tabular-nums mb-2 text-slate-900"
           >
             {time.getHours().toString().padStart(2, "0")}
             <span className="text-[#5465ff] inline-block mx-1">:</span>
@@ -206,14 +183,7 @@ export default function IntegratedGreeting() {
           </motion.div>
 
           <div className="flex items-center gap-3">
-            <div
-              className={cn(
-                "flex items-center gap-2 px-4 py-1.5 rounded-full backdrop-blur-md border",
-                isNight
-                  ? "bg-white/5 border-white/10 text-white"
-                  : "bg-slate-900 text-white shadow-lg",
-              )}
-            >
+            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900 text-white shadow-lg border border-transparent">
               <CalendarDays className="w-3.5 h-3.5" />
               <span className="text-[11px] font-bold tracking-wide uppercase">
                 {hijriDate}
@@ -222,15 +192,10 @@ export default function IntegratedGreeting() {
           </div>
         </div>
 
-        {/* Prayer Times Horizontal Scroll / Grid */}
+        {/* Prayer Times Grid */}
         <div className="w-full">
           <div className="flex items-center justify-between mb-4 px-1">
-            <h3
-              className={cn(
-                "text-xs font-black uppercase tracking-[0.2em]",
-                isNight ? "text-slate-500" : "text-slate-400",
-              )}
-            >
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">
               Jadwal Shalat
             </h3>
             <Clock className="w-3.5 h-3.5 text-[#5465ff]" />
@@ -248,9 +213,7 @@ export default function IntegratedGreeting() {
                     "relative overflow-hidden flex flex-col items-center justify-center py-5 rounded-[2rem] transition-all duration-500",
                     isActive
                       ? "bg-[#5465ff] text-white shadow-[0_20px_40px_-12px_rgba(84,101,255,0.4)] scale-[1.02] z-20"
-                      : isNight
-                        ? "bg-slate-900/40 border border-slate-800 text-slate-400"
-                        : "bg-slate-50 border border-slate-100 text-slate-600",
+                      : "bg-slate-50 border border-slate-100 text-slate-600",
                   )}
                 >
                   {isActive && (
@@ -284,11 +247,11 @@ export default function IntegratedGreeting() {
           alt="art"
           width={300}
           height={300}
-          className={isNight ? "invert" : ""}
+          className="" /* Hapus invert */
         />
       </div>
 
-      {/* Bottom Wave/Curve */}
+      {/* Bottom Wave/Curve - Warna fill disamakan dengan background bawah halaman (#FAFAFA) */}
       <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
         <svg
           viewBox="0 0 1200 120"
@@ -297,7 +260,7 @@ export default function IntegratedGreeting() {
         >
           <path
             d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C40.52,35.11,172.11,84.52,321.39,56.44Z"
-            className={isNight ? "fill-slate-900" : "fill-slate-50"}
+            className="fill-slate-50"
           ></path>
         </svg>
       </div>

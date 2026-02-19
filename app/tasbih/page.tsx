@@ -2,13 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  RotateCcw,
-  Settings2,
-  X,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const DZIKIR_STEPS = [
@@ -47,7 +41,6 @@ export default function TasbihPage() {
   const [count, setCount] = useState(0);
   const [target, setTarget] = useState(DZIKIR_STEPS[0].target);
   const [rotation, setRotation] = useState(0);
-  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     setTarget(DZIKIR_STEPS[currentStep].target);
@@ -70,6 +63,11 @@ export default function TasbihPage() {
     }
 
     if (navigator.vibrate) navigator.vibrate(40);
+  };
+
+  const handleReset = () => {
+    setCount(0);
+    setRotation(0);
   };
 
   return (
@@ -126,7 +124,6 @@ export default function TasbihPage() {
 
       {/* 3. TASBIH VISUAL (THE DONUT) */}
       <div className="relative flex flex-col items-center justify-center mb-12">
-        {/* Indikator Segitiga */}
         <div className="absolute top-[-14px] z-20">
           <motion.div
             animate={{ y: [0, 4, 0] }}
@@ -135,12 +132,10 @@ export default function TasbihPage() {
           />
         </div>
 
-        {/* Lingkaran Putih Donat - Clickable */}
         <button
           onClick={handleTap}
           className="relative w-80 h-80 flex items-center justify-center bg-white rounded-full shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] border border-slate-50 active:scale-95 transition-transform overflow-hidden outline-none"
         >
-          {/* Jalur Butiran yang Berputar */}
           <motion.div
             animate={{ rotate: rotation }}
             transition={{ type: "spring", stiffness: 100, damping: 20 }}
@@ -170,98 +165,36 @@ export default function TasbihPage() {
             })}
           </motion.div>
 
-          <span className="relative z-10 text-7xl font-black text-slate-800 tracking-tighter leading-none">
-            {count}
-          </span>
+          <div className="relative z-10 flex flex-col items-center">
+            <span className="text-7xl font-black text-slate-800 tracking-tighter leading-none">
+              {count}
+            </span>
+            <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-2">
+              Target: {target}
+            </span>
+          </div>
         </button>
       </div>
 
-      {/* 4. MAIN ACTION BUTTONS */}
+      {/* 4. RESET ACTION BUTTON */}
       <div
         className={cn(
-          // Mobile: Floating di tengah bawah, beri jarak pb-32 agar tidak tertutup bottom bar
-          "fixed bottom-32 left-1/2 -translate-x-1/2 z-40 w-full max-w-[200px]",
-          // Desktop: Menjadi bagian dari flow dokumen (tidak floating), tetap rapat di tengah
+          "fixed bottom-32 left-1/2 -translate-x-1/2 z-40",
           "md:relative md:bottom-0 md:left-0 md:translate-x-0 md:mt-12",
         )}
       >
-        <div className="bg-white/80 backdrop-blur-md md:bg-white p-3 rounded-[2.5rem] border border-slate-100 shadow-xl md:shadow-sm flex items-center justify-center gap-6">
+        <div className="bg-white p-2 rounded-full border border-slate-100 shadow-xl md:shadow-sm">
           <button
-            onClick={() => {
-              setCount(0);
-              setRotation(0);
-            }}
-            className="p-4 bg-slate-50 rounded-full text-slate-400 active:text-red-500 transition-colors hover:bg-red-50"
+            onClick={handleReset}
+            className="flex items-center gap-3 px-6 py-3 bg-slate-50 hover:bg-red-50 rounded-full text-slate-400 hover:text-red-500 transition-all group"
           >
-            <RotateCcw className="w-5 h-5" />
-          </button>
-          <div className="h-8 w-[1px] bg-slate-100" />{" "}
-          {/* Divider kecil biar makin rapi */}
-          <button
-            onClick={() => setShowModal(true)}
-            className="relative p-4 bg-slate-50 rounded-full text-slate-400 active:text-[#5465ff] transition-colors hover:bg-blue-50"
-          >
-            <Settings2 className="w-5 h-5" />
-            <span className="absolute -top-1 -right-1 bg-[#5465ff] text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-md">
-              {target}
+            <RotateCcw className="w-5 h-5 group-active:rotate-[-180deg] transition-transform duration-500" />
+            <span className="text-xs font-bold uppercase tracking-wider">
+              Reset
             </span>
           </button>
         </div>
       </div>
-
-      {/* 5. SETTINGS DRAWER (MODAL) */}
-      <AnimatePresence>
-        {showModal && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowModal(false)}
-              className="fixed inset-0 bg-black/40 z-[100] backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed bottom-0 left-0 right-0 bg-white z-[101] rounded-t-[3rem] p-8 pb-12 shadow-2xl"
-            >
-              <div className="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-8" />
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">
-                  Set Target Dzikir
-                </h3>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="p-2 bg-slate-50 rounded-full text-slate-400"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                {[33, 99, 100].map((val) => (
-                  <button
-                    key={val}
-                    onClick={() => {
-                      setTarget(val);
-                      setShowModal(false);
-                    }}
-                    className={cn(
-                      "py-4 rounded-[2rem] font-bold text-lg transition-all",
-                      target === val
-                        ? "bg-[#5465ff] text-white shadow-xl shadow-[#5465ff]/30"
-                        : "bg-slate-50 text-slate-400",
-                    )}
-                  >
-                    {val}
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
       <p className="mt-12 text-[9px] font-black text-slate-300 uppercase tracking-[0.5em]">
         ARAH - Pendamping Ibadah
