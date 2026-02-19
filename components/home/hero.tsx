@@ -484,61 +484,95 @@ export default function HeroSection() {
 
       {/* Congratulations Modal */}
       <Dialog open={showCongratulations} onOpenChange={setShowCongratulations}>
-        <DialogContent className="border-none bg-gradient-to-br from-[#5465ff] to-blue-600 shadow-2xl shadow-blue-500/30 rounded-[2.5rem] max-w-md">
-          <DialogTitle className="sr-only">Selamat Ulang Tahun</DialogTitle>
-          <DialogHeader className="text-center space-y-6">
+        <DialogContent className="border-none bg-gradient-to-br from-[#5465ff] to-blue-600 shadow-2xl shadow-blue-500/30 rounded-[2.5rem] max-w-md overflow-hidden">
+          {/* Dekorasi Watermark SVG di Latar Belakang */}
+          <div className="absolute -top-10 -left-10 opacity-10 pointer-events-none rotate-12">
+            <Image
+              src="/assets-svg/islamic-1-svgrepo-com.svg"
+              alt="Decoration"
+              width={200}
+              height={200}
+              className="invert"
+            />
+          </div>
+
+          <DialogTitle className="sr-only">Selamat</DialogTitle>
+          <DialogHeader className="text-center space-y-6 relative z-10">
             <div className="flex justify-center">
+              {/* Ikon Utama: Lentera Islami */}
               <motion.div
-                animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 0.6, repeat: Infinity }}
-                className="text-5xl"
+                animate={{
+                  y: [0, -10, 0],
+                  rotate: [0, 5, -5, 0],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="relative w-24 h-24"
               >
-                ✨
+                <Image
+                  src="/assets-svg/islamic-lantern-svgrepo-com.svg"
+                  alt="Islamic Lantern"
+                  fill
+                  className="invert drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+                />
               </motion.div>
             </div>
 
             <div className="space-y-4 text-white">
-              <h2 className="text-3xl font-black">Alhamdulillah! 🌙</h2>
+              <h2 className="text-3xl font-black tracking-tight">
+                Alhamdulillah! 🌙
+              </h2>
               <DialogDescription className="text-base leading-relaxed text-white/90 italic">
                 "Tidaklah sempurna ibadah seseorang melainkan dengan ilmu dan
                 keikhlasan." Semoga amal ibadahmu hari ini diterima oleh Allah
                 dan menjadi berkah bagimu dan keluargamu.
               </DialogDescription>
 
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 space-y-3">
-                <div>
-                  <p className="text-xs font-bold text-white/60 mb-2 uppercase tracking-widest">
-                    Doa Arab:
+              <div className="bg-white/10 backdrop-blur-md rounded-[2rem] p-6 border border-white/20 space-y-4">
+                <div className="space-y-2">
+                  <p className="text-[10px] font-black text-white/60 uppercase tracking-[0.2em]">
+                    Doa Arab
                   </p>
                   <p
-                    className="text-base text-white/90 leading-relaxed text-right"
+                    className="text-xl text-white font-medium leading-relaxed text-right"
                     style={{ direction: "rtl" }}
                   >
-                    اللهم تقبل منا إنك أنت السميع العليم وتب علينا إنك أنت
+                    اللهم تقبل منا إنك أنت السميع العليم وتب علينا إنk أنت
                     التواب الرحيم
                   </p>
                 </div>
-                <div className="border-t border-white/10 pt-3">
-                  <p className="text-xs font-bold text-white/60 mb-2 uppercase tracking-widest">
-                    Latin:
-                  </p>
-                  <p className="text-sm text-white/80 italic leading-relaxed">
-                    "Allahumma taqabbal minna, innaka anta as-sami'ul 'alim wa
-                    tubu 'alaina, innaka anta at-tawwabur rahim."
-                  </p>
-                  <p className="text-xs text-white/60 mt-3">
-                    <span className="font-semibold">Artinya: </span>"Ya Allah,
-                    terimalah dari kami, sesungguhnya Engkau adalah Yang Maha
-                    Mendengar lagi Maha Mengetahui. Terimalah taubat kami,
-                    sesungguhnya Engkau adalah Yang Maha Penerima taubat lagi
-                    Maha Penyayang."
-                  </p>
+
+                <div className="border-t border-white/10 pt-4 space-y-3">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-white/60 uppercase tracking-[0.2em]">
+                      Latin
+                    </p>
+                    <p className="text-xs text-white/80 italic leading-relaxed">
+                      "Allahumma taqabbal minna, innaka anta as-sami'ul 'alim wa
+                      tub 'alaina, innaka anta at-tawwabur rahim."
+                    </p>
+                  </div>
+
+                  <div className="bg-black/10 rounded-xl p-3">
+                    <p className="text-[10px] text-white/90 leading-relaxed">
+                      <span className="font-bold text-white uppercase tracking-wider">
+                        Artinya:{" "}
+                      </span>
+                      "Ya Allah, terimalah dari kami, sesungguhnya Engkau adalah
+                      Yang Maha Mendengar lagi Maha Mengetahui. Terimalah taubat
+                      kami, sesungguhnya Engkau adalah Yang Maha Penerima taubat
+                      lagi Maha Penyayang."
+                    </p>
+                  </div>
                 </div>
               </div>
 
               <button
                 onClick={() => setShowCongratulations(false)}
-                className="w-full mt-6 py-3 bg-white text-[#5465ff] rounded-2xl font-bold text-sm hover:bg-slate-50 transition-colors"
+                className="w-full mt-4 py-4 bg-white text-[#5465ff] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95 shadow-lg shadow-black/10"
               >
                 Terima Kasih
               </button>
