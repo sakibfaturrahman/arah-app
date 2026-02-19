@@ -48,12 +48,8 @@ export default function Home() {
               {/* Prayer & Info */}
               <div className="grid grid-cols-1 gap-6">
                 <HeroSection />
-              </div>
-
-              {/* Progress */}
-              <section>
                 <LastRead />
-              </section>
+              </div>
             </div>
           </div>
         </motion.div>

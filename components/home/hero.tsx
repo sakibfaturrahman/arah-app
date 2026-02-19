@@ -21,7 +21,16 @@ import {
   Share2,
   Check,
   Copy,
+  Moon,
+  X,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { getPrayerTimes, PrayerData } from "@/lib/getPrayerTimes";
 import { getDailyHadith } from "@/lib/getDailyHadith";
 import { cn } from "@/lib/utils";
@@ -50,6 +59,7 @@ export default function HeroSection() {
   const [tracker, setTracker] = useState<Record<string, boolean>>({});
   const [isCopied, setIsCopied] = useState(false);
   const [isShared, setIsShared] = useState(false);
+  const [showCongratulations, setShowCongratulations] = useState(false);
   const [nextPrayer, setNextPrayer] = useState({
     name: "...",
     time: "--:--",
@@ -89,6 +99,33 @@ export default function HeroSection() {
       setTracker(trackerData);
     }
     loadData();
+
+    // Timer untuk reset data setiap jam 00:00
+    const checkMidnight = () => {
+      const now = new Date();
+      const nextMidnight = new Date(now);
+      nextMidnight.setDate(nextMidnight.getDate() + 1);
+      nextMidnight.setHours(0, 0, 0, 0);
+
+      const timeUntilMidnight = nextMidnight.getTime() - now.getTime();
+
+      const timeout = setTimeout(() => {
+        // Reset tracker data
+        localStorage.setItem(
+          "ibadah_tracker_data",
+          JSON.stringify({ data: {}, date: new Date().toDateString() }),
+        );
+        setTracker({});
+        // Jalankan ulang loadData untuk fetch data baru
+        loadData();
+      }, timeUntilMidnight);
+
+      return timeout;
+    };
+
+    const timeoutId = checkMidnight();
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const toggleTracker = (name: string) => {
@@ -99,6 +136,16 @@ export default function HeroSection() {
       "ibadah_tracker_data",
       JSON.stringify({ data: newTracker, date: today }),
     );
+
+    // Check jika Tarawih ditekan dan semua ibadah selesai
+    if (name === "Tarawih") {
+      const allCompleted = prayerList.every((prayer) =>
+        prayer === "Tarawih" ? !tracker[prayer] : newTracker[prayer],
+      );
+      if (allCompleted) {
+        setShowCongratulations(true);
+      }
+    }
   };
 
   const calculateNextPrayer = (timings: any) => {
@@ -184,9 +231,9 @@ export default function HeroSection() {
   const shortcuts = [
     { icon: Sun, label: "Dzikir", href: "/dzikir" },
     { icon: Fingerprint, label: "Tasbih", href: "/tasbih" },
-    { icon: Calculator, label: "Zakat", href: "/ramadhan/kalkulator" },
+    { icon: Calculator, label: "Kalkulator", href: "/ramadhan/kalkulator" },
     { icon: MapPin, label: "Masjid", href: "/ramadhan/masjid-terdekat" },
-    { icon: Type, label: "Asmaul", href: "/asmaul-husna" },
+    { icon: Moon, label: "Asmaul", href: "/asmaul-husna" },
   ];
 
   return (
@@ -364,7 +411,7 @@ export default function HeroSection() {
           </div>
           <div className="flex-1">
             <h3 className="text-xl font-black text-slate-900 tracking-tight leading-none mb-1">
-              Ceklis Ibadah
+              Istiqomah Ibadah
             </h3>
             <div className="flex items-center gap-2">
               <div className="h-1.5 flex-1 bg-slate-100 rounded-full overflow-hidden">
@@ -434,6 +481,71 @@ export default function HeroSection() {
           ))}
         </div>
       </motion.div>
+
+      {/* Congratulations Modal */}
+      <Dialog open={showCongratulations} onOpenChange={setShowCongratulations}>
+        <DialogContent className="border-none bg-gradient-to-br from-[#5465ff] to-blue-600 shadow-2xl shadow-blue-500/30 rounded-[2.5rem] max-w-md">
+          <DialogTitle className="sr-only">Selamat Ulang Tahun</DialogTitle>
+          <DialogHeader className="text-center space-y-6">
+            <div className="flex justify-center">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+                transition={{ duration: 0.6, repeat: Infinity }}
+                className="text-5xl"
+              >
+                ✨
+              </motion.div>
+            </div>
+
+            <div className="space-y-4 text-white">
+              <h2 className="text-3xl font-black">Alhamdulillah! 🌙</h2>
+              <DialogDescription className="text-base leading-relaxed text-white/90 italic">
+                "Tidaklah sempurna ibadah seseorang melainkan dengan ilmu dan
+                keikhlasan." Semoga amal ibadahmu hari ini diterima oleh Allah
+                dan menjadi berkah bagimu dan keluargamu.
+              </DialogDescription>
+
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 space-y-3">
+                <div>
+                  <p className="text-xs font-bold text-white/60 mb-2 uppercase tracking-widest">
+                    Doa Arab:
+                  </p>
+                  <p
+                    className="text-base text-white/90 leading-relaxed text-right"
+                    style={{ direction: "rtl" }}
+                  >
+                    اللهم تقبل منا إنك أنت السميع العليم وتب علينا إنك أنت
+                    التواب الرحيم
+                  </p>
+                </div>
+                <div className="border-t border-white/10 pt-3">
+                  <p className="text-xs font-bold text-white/60 mb-2 uppercase tracking-widest">
+                    Latin:
+                  </p>
+                  <p className="text-sm text-white/80 italic leading-relaxed">
+                    "Allahumma taqabbal minna, innaka anta as-sami'ul 'alim wa
+                    tubu 'alaina, innaka anta at-tawwabur rahim."
+                  </p>
+                  <p className="text-xs text-white/60 mt-3">
+                    <span className="font-semibold">Artinya: </span>"Ya Allah,
+                    terimalah dari kami, sesungguhnya Engkau adalah Yang Maha
+                    Mendengar lagi Maha Mengetahui. Terimalah taubat kami,
+                    sesungguhnya Engkau adalah Yang Maha Penerima taubat lagi
+                    Maha Penyayang."
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowCongratulations(false)}
+                className="w-full mt-6 py-3 bg-white text-[#5465ff] rounded-2xl font-bold text-sm hover:bg-slate-50 transition-colors"
+              >
+                Terima Kasih
+              </button>
+            </div>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }
