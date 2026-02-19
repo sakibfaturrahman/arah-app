@@ -53,7 +53,7 @@ export default function Navbar() {
   const ramadhanLinks = [
     {
       name: "Kalkulator Islami",
-      desc: "Hitung Target Dan Zakat",
+      desc: "Hitung Target Khatam",
       href: "/ramadhan/kalkulator",
       icon: ClipboardCheck,
       color: "bg-emerald-50 text-emerald-500",
