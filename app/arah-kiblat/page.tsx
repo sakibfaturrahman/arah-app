@@ -174,7 +174,7 @@ export default function ArahKiblat() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="text-4xl font-black tracking-tight text-slate-900 mb-2"
         >
-          Kiblat<span className="text-[#5465ff]">Finder</span>
+          Arah {""}<span className="text-[#5465ff]">Kiblat</span>
         </motion.h1>
         <motion.p
           initial={{ y: 10, opacity: 0 }}
