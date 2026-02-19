@@ -52,9 +52,9 @@ export default function Navbar() {
 
   const ramadhanLinks = [
     {
-      name: "Mutaba'ah Yaumiyah",
-      desc: "Tracker Ibadah & Al-Qur'an",
-      href: "/ramadhan/tracker",
+      name: "Kalkulator Islami",
+      desc: "Hitung Target Dan Zakat",
+      href: "/ramadhan/kalkulator",
       icon: ClipboardCheck,
       color: "bg-emerald-50 text-emerald-500",
     },

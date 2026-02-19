@@ -2,13 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, Variants, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Quote,
   BellRing,
   Timer,
-  Sparkles,
   ArrowRight,
   Loader2,
   Fingerprint,
@@ -17,9 +17,15 @@ import {
   Type,
   Sun,
   Zap,
+  CheckCircle2,
+  Share2,
+  Check,
+  Copy,
 } from "lucide-react";
 import { getPrayerTimes, PrayerData } from "@/lib/getPrayerTimes";
 import { getDailyHadith } from "@/lib/getDailyHadith";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -42,6 +48,8 @@ export default function HeroSection() {
   const [prayerData, setPrayerData] = useState<PrayerData | null>(null);
   const [dailyHadith, setDailyHadith] = useState<any>(null);
   const [tracker, setTracker] = useState<Record<string, boolean>>({});
+  const [isCopied, setIsCopied] = useState(false);
+  const [isShared, setIsShared] = useState(false);
   const [nextPrayer, setNextPrayer] = useState({
     name: "...",
     time: "--:--",
@@ -61,9 +69,24 @@ export default function HeroSection() {
         setPrayerData(pData);
         calculateNextPrayer(pData.timings);
       }
-
-      const savedTracker = localStorage.getItem("ibadah_tracker");
-      if (savedTracker) setTracker(JSON.parse(savedTracker));
+      const savedTrackerData = localStorage.getItem("ibadah_tracker_data");
+      let trackerData = {};
+      const today = new Date().toDateString();
+      if (savedTrackerData) {
+        const { data, date } = JSON.parse(savedTrackerData);
+        if (date === today) trackerData = data;
+        else
+          localStorage.setItem(
+            "ibadah_tracker_data",
+            JSON.stringify({ data: {}, date: today }),
+          );
+      } else {
+        localStorage.setItem(
+          "ibadah_tracker_data",
+          JSON.stringify({ data: {}, date: today }),
+        );
+      }
+      setTracker(trackerData);
     }
     loadData();
   }, []);
@@ -71,7 +94,11 @@ export default function HeroSection() {
   const toggleTracker = (name: string) => {
     const newTracker = { ...tracker, [name]: !tracker[name] };
     setTracker(newTracker);
-    localStorage.setItem("ibadah_tracker", JSON.stringify(newTracker));
+    const today = new Date().toDateString();
+    localStorage.setItem(
+      "ibadah_tracker_data",
+      JSON.stringify({ data: newTracker, date: today }),
+    );
   };
 
   const calculateNextPrayer = (timings: any) => {
@@ -85,7 +112,6 @@ export default function HeroSection() {
       { name: "Maghrib", time: timings.Maghrib },
       { name: "Isya", time: timings.Isha },
     ];
-
     let found = false;
     for (let prayer of prayers) {
       const [h, m] = prayer.time.split(":").map(Number);
@@ -105,6 +131,51 @@ export default function HeroSection() {
       setNextPrayer({ name: "Imsak", time: timings.Imsak, diff: "Besok" });
   };
 
+  const handleShareHadith = async () => {
+    if (!dailyHadith) return;
+
+    const shareText = `Hadits Hari Ini\n\n${dailyHadith.arab}\n\n"${dailyHadith.id}"\n\n(${dailyHadith.slug} - No. ${dailyHadith.number})\n\nDibagikan melalui Aplikasi Arah.`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Hadits Hari Ini",
+          text: shareText,
+          url: window.location.href,
+        });
+        setIsShared(true);
+        toast.success("Hadits dibagikan!");
+        setTimeout(() => setIsShared(false), 2000);
+      } catch (err) {
+        console.log("Error sharing", err);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        setIsShared(true);
+        toast.success("Link hadits disalin!");
+        setTimeout(() => setIsShared(false), 2000);
+      } catch (err) {
+        toast.error("Gagal bagikan hadits");
+      }
+    }
+  };
+
+  const handleCopyHadith = async () => {
+    if (!dailyHadith) return;
+
+    const shareText = `Hadits Hari Ini\n\n${dailyHadith.arab}\n\n"${dailyHadith.id}"\n\n(${dailyHadith.slug} - No. ${dailyHadith.number})\n\nDibagikan melalui Aplikasi Arah.`;
+
+    try {
+      await navigator.clipboard.writeText(shareText);
+      setIsCopied(true);
+      toast.success("Hadits berhasil disalin!");
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      toast.error("Gagal menyalin hadits");
+    }
+  };
+
   const completedCount = Object.values(tracker).filter(Boolean).length;
   const progressPercentage = Math.round(
     (completedCount / prayerList.length) * 100,
@@ -113,7 +184,7 @@ export default function HeroSection() {
   const shortcuts = [
     { icon: Sun, label: "Dzikir", href: "/dzikir" },
     { icon: Fingerprint, label: "Tasbih", href: "/tasbih" },
-    { icon: Calculator, label: "Zakat", href: "/kalkulator" },
+    { icon: Calculator, label: "Zakat", href: "/ramadhan/kalkulator" },
     { icon: MapPin, label: "Masjid", href: "/ramadhan/masjid-terdekat" },
     { icon: Type, label: "Asmaul", href: "/asmaul-husna" },
   ];
@@ -123,112 +194,154 @@ export default function HeroSection() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="px-4 md:px-0 space-y-5 md:space-y-6 pb-12 w-full max-w-full overflow-x-hidden"
+      className="w-full max-w-4xl mx-auto px-4 md:px-0 space-y-10 pb-20"
     >
-      {/* 1. SMART ACTIVITY BAR */}
-      <motion.div variants={itemVariants} className="relative group">
-        <div className="absolute -inset-1 bg-gradient-to-r from-[#5465ff] to-cyan-400 rounded-[2rem] md:rounded-[3rem] blur opacity-10 group-hover:opacity-20 transition duration-1000"></div>
-        <div className="relative bg-white border border-gray-100 rounded-[2rem] md:rounded-[3rem] p-1.5 flex flex-col md:flex-row items-center shadow-sm">
-          <div className="flex-1 flex items-center gap-3 md:gap-4 px-4 py-3 md:px-6 md:py-3 w-full border-b md:border-b-0 md:border-r border-gray-50">
-            <div className="bg-[#5465ff]/10 p-2.5 md:p-3 rounded-full text-[#5465ff] flex-shrink-0">
-              <BellRing className="w-4 h-4 md:w-5 md:h-5 animate-pulse" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[9px] md:text-[10px] uppercase font-bold text-gray-400 tracking-widest truncate">
-                Berikutnya
-              </p>
-              <div className="flex items-center gap-2">
-                <span className="text-lg md:text-xl font-black text-gray-800 truncate">
-                  {nextPrayer.name}
-                </span>
-                <span className="text-lg md:text-xl font-mono font-light text-[#5465ff]">
-                  {nextPrayer.time}
-                </span>
+      {/* 1. NEXT PRAYER & BORDERLESS SHORTCUTS */}
+      <div className="flex flex-col gap-10">
+        <motion.div variants={itemVariants} className="w-full">
+          <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 flex flex-col md:flex-row md:items-center justify-between shadow-sm">
+            <div className="flex items-center gap-6">
+              <div className="bg-[#5465ff]/10 p-4 rounded-3xl text-[#5465ff]">
+                <BellRing className="w-6 h-6 animate-pulse" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">
+                  Shalat Berikutnya
+                </p>
+                <div className="flex items-baseline gap-3">
+                  <h3 className="text-3xl font-black text-slate-900">
+                    {nextPrayer.name}
+                  </h3>
+                  <span className="text-2xl font-light text-[#5465ff]">
+                    {nextPrayer.time}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex-1 flex items-center justify-between px-4 py-3 md:px-6 md:py-3 w-full">
-            <div className="flex items-center gap-3">
-              <Timer className="w-4 h-4 md:w-5 md:h-5 text-orange-400" />
-              <span className="text-xs md:text-sm font-bold text-gray-700">
-                {nextPrayer.diff} lagi
-              </span>
-            </div>
-            <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#5465ff] group-hover:text-white transition-all cursor-pointer">
-              <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
-            </div>
-          </div>
-        </div>
-      </motion.div>
 
-      {/* 2. FLOATING SHORTCUTS - Unified Dock */}
-      <motion.div
-        variants={itemVariants}
-        className="flex justify-center w-full px-2"
-      >
-        <div className="bg-white/80 backdrop-blur-xl border border-gray-100 p-2 md:p-3 rounded-full md:rounded-[2.5rem] shadow-xl shadow-blue-500/5 flex items-center gap-2 md:gap-3 w-fit">
+            <div className="mt-6 md:mt-0 flex items-center justify-between md:justify-end md:gap-8 border-t md:border-t-0 pt-4 md:pt-0">
+              <div className="flex items-center gap-2 text-orange-500 bg-orange-50 px-4 py-2 rounded-full font-bold text-xs">
+                <Timer className="w-4 h-4" />
+                {nextPrayer.diff} lagi
+              </div>
+              <button className="p-3 bg-slate-900 text-white rounded-full hover:bg-[#5465ff] transition-all group">
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          variants={itemVariants}
+          className="grid grid-cols-5 gap-2 md:gap-4"
+        >
           {shortcuts.map((s, i) => (
             <motion.a
               key={i}
               href={s.href}
-              whileHover={{ y: -5, scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="relative w-10 h-10 md:w-12 md:h-12 flex flex-col items-center justify-center rounded-full bg-gray-50 text-gray-400 transition-colors duration-300 group"
+              // Efek melayang saat hover: naik ke atas (y: -8) dan sedikit membesar
+              whileHover={{
+                y: -8,
+                transition: { duration: 0.3, ease: "easeOut" },
+              }}
+              // Efek saat ditekan: mengecil sedikit untuk sensasi klik tactile
+              whileTap={{ scale: 0.92 }}
+              className="flex flex-col items-center gap-3 group transition-all"
             >
-              <span className="absolute -top-10 scale-0 group-hover:scale-100 transition-all bg-gray-800 text-white text-[9px] px-2 py-1 rounded-md font-bold uppercase tracking-tighter hidden md:block">
+              <div className="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-3xl bg-white shadow-sm border border-slate-50 group-hover:shadow-xl group-hover:shadow-blue-500/10 group-hover:border-[#5465ff] group-hover:bg-blue-50 transition-all duration-300">
+                <s.icon className="w-6 h-6 text-slate-400 group-hover:text-[#5465ff] transition-colors duration-300" />
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900 transition-colors duration-300 text-center leading-tight">
                 {s.label}
               </span>
-              <s.icon className="w-4 h-4 md:w-5 md:h-5 group-active:text-[#5465ff]" />
             </motion.a>
           ))}
-          <div className="h-5 w-px bg-gray-100 mx-0.5" />
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-[#5465ff]/5 text-[#5465ff]"
-          >
-            <Zap className="w-3 h-3 md:w-4 md:h-4 fill-current" />
-          </motion.button>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
 
-      {/* 3. HADITH CARD */}
+      {/* 2. HADITH CARD (Biru Dominan - Kontras Tinggi) */}
       <motion.div variants={itemVariants}>
-        <Card className="border-none bg-gradient-to-br from-[#5465ff] to-[#7a89ff] text-white shadow-xl overflow-hidden relative rounded-tl-[3rem] rounded-br-[3rem] md:rounded-tl-[4rem] md:rounded-br-[4rem] rounded-tr-xl rounded-bl-xl">
-          <div className="absolute top-[-10%] right-[-5%] w-32 h-32 md:w-40 md:h-40 bg-white/10 rounded-full blur-3xl" />
-          <CardContent className="p-6 md:p-10 relative z-10">
-            <div className="flex justify-between items-start mb-4 md:mb-6">
-              <Badge className="bg-white/20 backdrop-blur-md border-none px-2.5 py-0.5 md:px-3 md:py-1 text-[8px] md:text-[9px] uppercase font-bold tracking-[0.2em]">
-                Satu Hari Satu Hadist
+        <Card className="border-none bg-[#5465ff] shadow-2xl shadow-blue-500/20 overflow-hidden rounded-[2.5rem] relative">
+          <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+            <Image
+              src="/assets-svg/islamic-lantern-svgrepo-com.svg"
+              alt="Islamic Icon"
+              width={180}
+              height={180}
+              className="invert"
+            />
+          </div>
+
+          <CardContent className="p-8 md:p-12 relative z-10">
+            <div className="flex justify-between items-start mb-10">
+              <Badge className="bg-white/20 text-white border-none px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
+                Hadits Hari Ini
               </Badge>
-              <Quote className="text-white/20 w-8 h-8 md:w-10 md:h-10 rotate-180" />
+
+              <div className="flex gap-2">
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleCopyHadith}
+                  className="bg-white/10 hover:bg-white/20 p-2.5 rounded-full backdrop-blur-sm transition-colors text-white border border-white/10"
+                  title="Salin Hadits"
+                >
+                  {isCopied ? (
+                    <Check className="w-5 h-5 text-green-300" />
+                  ) : (
+                    <Copy className="w-5 h-5" />
+                  )}
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleShareHadith}
+                  className="bg-white/10 hover:bg-white/20 p-2.5 rounded-full backdrop-blur-sm transition-colors text-white border border-white/10"
+                  title="Bagikan Hadits"
+                >
+                  {isShared ? (
+                    <Check className="w-5 h-5 text-green-300" />
+                  ) : (
+                    <Share2 className="w-5 h-5" />
+                  )}
+                </motion.button>
+              </div>
             </div>
 
             <AnimatePresence mode="wait">
               {dailyHadith ? (
-                <div className="space-y-4 md:y-6">
+                <div className="space-y-10">
                   <p
-                    className="text-right text-xl md:text-3xl font-serif leading-relaxed opacity-95 select-none"
+                    className="text-right text-3xl md:text-5xl font-serif leading-[1.8] md:leading-[1.6] text-white font-medium"
                     style={{ direction: "rtl" }}
                   >
                     {dailyHadith.arab}
                   </p>
-                  <div className="bg-black/10 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-5 border border-white/5">
-                    <p className="text-[11px] md:text-sm font-light leading-relaxed opacity-90 italic text-blue-50">
+
+                  <div className="space-y-6">
+                    <p className="text-base md:text-xl font-medium leading-relaxed text-blue-50 italic border-l-2 border-white/30 pl-6">
                       "{dailyHadith.id}"
                     </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3 text-cyan-300" />
-                    <p className="text-[8px] md:text-[10px] font-mono opacity-60 uppercase tracking-widest truncate">
-                      {dailyHadith.slug} — NO. {dailyHadith.number}
-                    </p>
+
+                    <div className="flex items-center gap-3 pt-6 border-t border-white/10">
+                      <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm">
+                        <Image
+                          src="/assets-svg/islamic-lantern-svgrepo-com.svg"
+                          alt="icon"
+                          width={16}
+                          height={16}
+                          className="invert opacity-80"
+                        />
+                      </div>
+                      <span className="text-[10px] font-bold text-white/60 uppercase tracking-[0.2em]">
+                        {dailyHadith.slug} — NO. {dailyHadith.number}
+                      </span>
+                    </div>
                   </div>
                 </div>
               ) : (
-                <div className="h-24 md:h-32 flex flex-col items-center justify-center gap-3">
-                  <Loader2 className="w-5 h-5 animate-spin text-white/50" />
-                  <span className="text-[8px] tracking-widest uppercase opacity-40">
-                    Sinkronisasi...
+                <div className="h-40 flex flex-col items-center justify-center gap-4 text-white">
+                  <Loader2 className="w-6 h-6 animate-spin opacity-50" />
+                  <span className="text-[10px] tracking-[0.3em] uppercase opacity-40 font-bold">
+                    Sinkronisasi
                   </span>
                 </div>
               )}
@@ -237,78 +350,86 @@ export default function HeroSection() {
         </Card>
       </motion.div>
 
-      {/* 4. PROGRESS TRACKER */}
-      <motion.div
-        variants={itemVariants}
-        className="flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-6"
-      >
-        {/* Progress Summary */}
-        <div className="bg-white border border-gray-100 rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-6 shadow-sm flex flex-row md:flex-col items-center md:justify-center gap-4 md:text-center">
-          <div className="relative w-16 h-16 md:w-24 md:h-24 flex-shrink-0">
-            <svg className="w-full h-full" viewBox="0 0 36 36">
-              <circle
-                className="text-gray-100"
-                cx="18"
-                cy="18"
-                r="15.9155"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-              />
-              <motion.path
-                initial={{ strokeDasharray: "0, 100" }}
-                animate={{ strokeDasharray: `${progressPercentage}, 100` }}
-                className="text-[#5465ff]"
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-sm md:text-xl font-black text-gray-800 leading-none">
+      {/* 3. TRACKER SECTION */}
+      <motion.div variants={itemVariants} className="space-y-6">
+        <div className="flex items-center gap-4 px-2">
+          <div className="bg-[#5465ff] p-3 rounded-2xl shadow-lg shadow-blue-200">
+            <Image
+              src="/assets-svg/mun-mashhad-svgrepo-com.svg"
+              alt="Checklist Icon"
+              width={24}
+              height={24}
+              className="invert"
+            />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-xl font-black text-slate-900 tracking-tight leading-none mb-1">
+              Ceklis Ibadah
+            </h3>
+            <div className="flex items-center gap-2">
+              <div className="h-1.5 flex-1 bg-slate-100 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercentage}%` }}
+                  className="h-full bg-[#5465ff]"
+                />
+              </div>
+              <span className="text-xs font-black text-[#5465ff]">
                 {progressPercentage}%
               </span>
             </div>
           </div>
-          <div className="flex flex-col md:items-center">
-            <h3 className="text-[10px] md:text-xs font-bold text-gray-800 uppercase tracking-tighter">
-              Rutinitas Ibadah
-            </h3>
-            <p className="text-[9px] md:text-[10px] text-gray-400">
-              {completedCount}/{prayerList.length} selesai
-            </p>
-          </div>
         </div>
 
-        {/* Buttons Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 md:col-span-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {prayerList.map((prayer) => (
             <button
               key={prayer}
               onClick={() => toggleTracker(prayer)}
-              className={`group flex flex-col items-start p-3 md:p-4 rounded-2xl md:rounded-[1.8rem] border transition-all duration-300 ${
+              className={cn(
+                "flex flex-col items-start gap-3 p-5 rounded-[2rem] border transition-all duration-300 active:scale-95 shadow-sm",
                 tracker[prayer]
-                  ? "bg-[#5465ff] border-[#5465ff] text-white shadow-md shadow-blue-100"
-                  : "bg-white border-gray-100 text-gray-600 active:bg-blue-50"
-              }`}
+                  ? "bg-[#5465ff] border-[#5465ff] text-white shadow-blue-200"
+                  : "bg-white border-slate-50 text-slate-600 hover:border-slate-200",
+              )}
             >
               <div
-                className={`p-1.5 md:p-2 rounded-lg mb-2 md:mb-3 ${tracker[prayer] ? "bg-white/20" : "bg-gray-50"}`}
+                className={cn(
+                  "w-10 h-10 rounded-2xl flex items-center justify-center",
+                  tracker[prayer] ? "bg-white/20" : "bg-slate-50",
+                )}
               >
-                <Zap
-                  className={`w-3 h-3 ${tracker[prayer] ? "text-white" : "text-gray-400"}`}
-                />
+                {tracker[prayer] ? (
+                  <Image
+                    src="/assets-svg/mosque-svgrepo-com.svg"
+                    alt="completed"
+                    width={20}
+                    height={20}
+                    className="invert brightness-0"
+                  />
+                ) : (
+                  <Image
+                    src="/assets-svg/islamic-1-svgrepo-com.svg"
+                    alt="pending"
+                    width={20}
+                    height={20}
+                    className="opacity-40"
+                  />
+                )}
               </div>
-              <span className="text-[10px] md:text-[11px] font-bold tracking-tight">
-                {prayer}
-              </span>
-              <span
-                className={`text-[7px] md:text-[8px] uppercase mt-0.5 ${tracker[prayer] ? "text-blue-100" : "text-gray-300"}`}
-              >
-                {tracker[prayer] ? "Selesai" : "Pending"}
-              </span>
+              <div className="text-left">
+                <span className="block text-[11px] font-black uppercase tracking-wider">
+                  {prayer}
+                </span>
+                <span
+                  className={cn(
+                    "text-[8px] uppercase font-bold",
+                    tracker[prayer] ? "text-white/60" : "text-slate-400",
+                  )}
+                >
+                  {tracker[prayer] ? "Selesai" : "Belum"}
+                </span>
+              </div>
             </button>
           ))}
         </div>

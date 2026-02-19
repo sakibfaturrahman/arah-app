@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   CalendarDays,
   MapPin,
@@ -8,20 +8,24 @@ import {
   SunMoon,
   Moon,
   CloudSun,
-  Clock,
   RefreshCw,
+  Clock,
 } from "lucide-react";
 import Image from "next/image";
 import { getHijriDate } from "@/lib/getHijri";
+import { getPrayerTimes, PRAYER_LIST } from "@/lib/getPrayerTimes";
 import { cn } from "@/lib/utils";
 
-export default function Greeting() {
+export default function IntegratedGreeting() {
   const [time, setTime] = useState(new Date());
+  const [timings, setTimings] = useState<any>(null);
+  const [activePrayer, setActivePrayer] = useState<string>("");
   const [hijriDate, setHijriDate] = useState<string>("Memuat...");
   const [locationName, setLocationName] = useState<string>("Mencari Lokasi...");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  // LOGIC (Tetap sama sesuai permintaan)
   const fetchLocationName = useCallback(async () => {
     const savedLoc = localStorage.getItem("user-location");
     if (savedLoc) {
@@ -35,18 +39,8 @@ export default function Greeting() {
       } catch (error) {
         setLocationName("Lokasi Terdeteksi");
       }
-    } else {
-      setLocationName("Atur Lokasi");
     }
   }, []);
-
-  useEffect(() => {
-    setMounted(true);
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    getHijriDate().then((res) => res && setHijriDate(res));
-    fetchLocationName();
-    return () => clearInterval(timer);
-  }, [fetchLocationName]);
 
   const handleUpdateLocation = () => {
     if ("geolocation" in navigator) {
@@ -59,153 +53,254 @@ export default function Greeting() {
             JSON.stringify({ lat: latitude, lng: longitude }),
           );
           fetchLocationName().then(() => {
-            setTimeout(() => setIsRefreshing(false), 1000);
-            window.dispatchEvent(new Event("location-updated"));
+            setTimeout(() => {
+              setIsRefreshing(false);
+              window.location.reload();
+            }, 800);
           });
         },
-        () => {
-          setIsRefreshing(false);
-          alert("Gagal memperbarui lokasi.");
-        },
+        () => setIsRefreshing(false),
       );
     }
   };
+
+  const checkActivePrayer = useCallback((data: any) => {
+    const now = new Date();
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+    let currentActive = "";
+    for (let i = 0; i < PRAYER_LIST.length; i++) {
+      const [h, m] = data[PRAYER_LIST[i].key].split(":").map(Number);
+      const prayerMins = h * 60 + m;
+      const nextPrayerObj = PRAYER_LIST[i + 1];
+      let nextMins = 1440;
+      if (nextPrayerObj) {
+        const [nh, nm] = data[nextPrayerObj.key].split(":").map(Number);
+        nextMins = nh * 60 + nm;
+      }
+      if (currentMins >= prayerMins && currentMins < nextMins) {
+        currentActive = PRAYER_LIST[i].key;
+        break;
+      }
+    }
+    setActivePrayer(currentActive);
+  }, []);
+
+  useEffect(() => {
+    setMounted(true);
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    getHijriDate().then((res) => res && setHijriDate(res));
+    getPrayerTimes().then((data) => {
+      if (data) {
+        setTimings(data.timings);
+        checkActivePrayer(data.timings);
+      }
+    });
+    fetchLocationName();
+    return () => clearInterval(timer);
+  }, [fetchLocationName, checkActivePrayer]);
+
+  if (!mounted) return null;
 
   const hours = time.getHours();
   const getGreeting = () => {
     if (hours >= 5 && hours < 11)
       return {
         text: "Selamat Pagi",
-        icon: <Sun className="w-4 h-4 text-amber-500" />,
+        icon: <Sun className="text-amber-500" />,
+        theme: "from-amber-50 to-white",
       };
     if (hours >= 11 && hours < 15)
       return {
         text: "Selamat Siang",
-        icon: <CloudSun className="w-4 h-4 text-orange-400" />,
+        icon: <CloudSun className="text-orange-400" />,
+        theme: "from-blue-50 to-white",
       };
     if (hours >= 15 && hours < 18)
       return {
         text: "Selamat Sore",
-        icon: <SunMoon className="w-4 h-4 text-orange-500" />,
+        icon: <SunMoon className="text-orange-500" />,
+        theme: "from-orange-50 to-white",
       };
     return {
       text: "Selamat Malam",
-      icon: <Moon className="w-4 h-4 text-indigo-400" />,
+      icon: <Moon className="text-indigo-400" />,
+      theme: "from-slate-900 to-slate-800",
     };
   };
 
-  const { text, icon } = getGreeting();
-  if (!mounted) return null;
+  const { text, icon, theme } = getGreeting();
+  const isNight = hours >= 18 || hours < 5;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
+    <motion.section
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       className={cn(
-        // Card base
-        "relative overflow-hidden bg-5465ff backdrop-blur-md border border-white",
-        // Custom curves: top-left and bottom-right more rounded, bottom-left and top-right less so
-        "rounded-[2.5rem] rounded-tl-[4rem] rounded-br-[4rem] md:rounded-[2.5rem] md:rounded-tl-[3.5rem] md:rounded-br-[3.5rem]",
-        // Extra: subtle border and shadow for depth
-        "before:absolute before:inset-0 before:rounded-[2.5rem] before:rounded-tl-[4rem] before:rounded-br-[4rem] before:bg-gradient-to-br before:from-[#5465ff]/10 before:to-[#788bff]/5 before:pointer-events-none",
+        "relative w-full min-h-[500px] pt-12 pb-20 overflow-hidden transition-colors duration-1000",
+        isNight ? "bg-slate-950" : "bg-white",
       )}
-      style={{
-        WebkitMaskImage:
-          "radial-gradient(ellipse 120% 100% at 50% 0%, #000 80%, transparent 100%)",
-      }}
     >
-      {/* Background Decor - Bulatan Lembut & Lengkungan */}
-      <div className="absolute -top-12 -left-12 w-40 h-40 bg-[#5465ff]/10 rounded-full blur-3xl" />
-      <div className="absolute -bottom-12 -right-12 w-40 h-40 bg-orange-200/30 rounded-full blur-3xl" />
-      {/* Extra: Lengkungan bawah */}
-      <svg
-        className="absolute bottom-0 left-0 w-full h-10 md:h-12"
-        viewBox="0 0 100 10"
-        preserveAspectRatio="none"
-      >
-        <path d="M0,0 Q50,20 100,0 L100,10 L0,10 Z" fill="#5465ff0d" />
-      </svg>
+      {/* Soft Background Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_top,_var(--tw-gradient-from)_0%,_transparent_70%)] from-blue-500/10 pointer-events-none" />
 
-      <div className="relative z-10 p-7 md:p-10 flex flex-col gap-8">
-        {/* Top Section: Greeting & Location */}
-        <div className="flex flex-col items-center md:items-start space-y-2">
-          <div className="flex items-center gap-2 px-4 py-1.5 bg-slate-50 rounded-full border border-slate-100 shadow-sm">
-            {icon}
-            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
-              {text}
-            </span>
+      <div className="relative z-10 px-6 max-w-lg mx-auto flex flex-col items-center">
+        {/* Header: Greeting & Location */}
+        <div className="w-full flex justify-between items-start mb-10">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span
+                className={cn(
+                  "text-[11px] font-bold uppercase tracking-[0.2em]",
+                  isNight ? "text-slate-400" : "text-slate-500",
+                )}
+              >
+                {text}
+              </span>
+              <div className="w-1.5 h-1.5 rounded-full bg-[#5465ff] animate-pulse" />
+            </div>
+            <h2
+              className={cn(
+                "text-2xl font-bold tracking-tight",
+                isNight ? "text-white" : "text-slate-900",
+              )}
+            >
+              Assalamu’alaikum<span className="text-[#5465ff]">.</span>
+            </h2>
           </div>
 
-          <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
-            Assalamu’alaikum<span className="text-[#5465ff]">.</span>
-          </h2>
-
-          <div className="flex items-center gap-2 pt-1">
+          <button
+            onClick={handleUpdateLocation}
+            className={cn(
+              "flex items-center gap-2 py-2 px-3 rounded-2xl border transition-all active:scale-95",
+              isNight
+                ? "bg-slate-900/50 border-slate-800 text-slate-300"
+                : "bg-slate-50 border-slate-100 text-slate-600",
+            )}
+          >
             <MapPin className="w-3.5 h-3.5 text-[#5465ff]" />
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-tighter">
+            <span className="text-[10px] font-bold truncate max-w-[80px] uppercase tracking-wider">
               {locationName}
             </span>
-            <div className="flex flex-col items-center gap-0.5 ml-1">
-              <button
-                onClick={handleUpdateLocation}
-                disabled={isRefreshing}
-                className="p-1.5 hover:bg-[#5465ff]/10 rounded-full transition-colors group"
-              >
-                <RefreshCw
-                  className={cn(
-                    "w-3 h-3 text-gray-300 group-hover:text-[#5465ff]",
-                    isRefreshing && "animate-spin",
-                  )}
-                />
-              </button>
-              <span className="text-[7px] font-bold text-gray-300 uppercase tracking-tighter whitespace-nowrap">
-                Perbarui
+            <RefreshCw
+              className={cn(
+                "w-3 h-3 opacity-50",
+                isRefreshing && "animate-spin",
+              )}
+            />
+          </button>
+        </div>
+
+        {/* Big Clock Display */}
+        <div className="relative mb-12 flex flex-col items-center">
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className={cn(
+              "text-8xl font-black tracking-tighter tabular-nums mb-2",
+              isNight ? "text-white" : "text-slate-900",
+            )}
+          >
+            {time.getHours().toString().padStart(2, "0")}
+            <span className="text-[#5465ff] inline-block mx-1">:</span>
+            {time.getMinutes().toString().padStart(2, "0")}
+          </motion.div>
+
+          <div className="flex items-center gap-3">
+            <div
+              className={cn(
+                "flex items-center gap-2 px-4 py-1.5 rounded-full backdrop-blur-md border",
+                isNight
+                  ? "bg-white/5 border-white/10 text-white"
+                  : "bg-slate-900 text-white shadow-lg",
+              )}
+            >
+              <CalendarDays className="w-3.5 h-3.5" />
+              <span className="text-[11px] font-bold tracking-wide uppercase">
+                {hijriDate}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Bottom Section: Time & Dates (Dibuat melengkung ke dalam) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-6 pt-6 border-t border-dashed border-gray-100">
-          {/* Jam Utama */}
-          <div className="flex justify-center md:justify-start items-baseline gap-1">
-            <span className="text-5xl md:text-6xl font-black text-gray-800 tracking-tighter">
-              {time.getHours().toString().padStart(2, "0")}
-              <span className="text-[#5465ff] opacity-30">:</span>
-              {time.getMinutes().toString().padStart(2, "0")}
-            </span>
-            {/* Detik dihilangkan */}
+        {/* Prayer Times Horizontal Scroll / Grid */}
+        <div className="w-full">
+          <div className="flex items-center justify-between mb-4 px-1">
+            <h3
+              className={cn(
+                "text-xs font-black uppercase tracking-[0.2em]",
+                isNight ? "text-slate-500" : "text-slate-400",
+              )}
+            >
+              Jadwal Shalat
+            </h3>
+            <Clock className="w-3.5 h-3.5 text-[#5465ff]" />
           </div>
 
-          {/* Kalender Duo */}
-          <div className="flex flex-col items-center md:items-end gap-2">
-            <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-br from-[#5465ff] to-[#788bff] text-white rounded-2xl shadow-lg shadow-[#5465ff]/20">
-              <CalendarDays className="w-4 h-4 text-white/80" />
-              <span className="text-xs font-black tracking-tight">
-                {hijriDate}
-              </span>
-            </div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-              {time.toLocaleDateString("id-ID", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
-            </p>
+          <div className="grid grid-cols-3 gap-3">
+            {PRAYER_LIST.map((prayer) => {
+              const timeVal = timings ? timings[prayer.key] : "--:--";
+              const isActive = activePrayer === prayer.key;
+
+              return (
+                <div
+                  key={prayer.key}
+                  className={cn(
+                    "relative overflow-hidden flex flex-col items-center justify-center py-5 rounded-[2rem] transition-all duration-500",
+                    isActive
+                      ? "bg-[#5465ff] text-white shadow-[0_20px_40px_-12px_rgba(84,101,255,0.4)] scale-[1.02] z-20"
+                      : isNight
+                        ? "bg-slate-900/40 border border-slate-800 text-slate-400"
+                        : "bg-slate-50 border border-slate-100 text-slate-600",
+                  )}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeGlow"
+                      className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none"
+                    />
+                  )}
+                  <span
+                    className={cn(
+                      "text-[9px] font-black uppercase tracking-widest mb-1.5",
+                      isActive ? "text-white/80" : "text-slate-400",
+                    )}
+                  >
+                    {prayer.label}
+                  </span>
+                  <span className="text-lg font-bold tracking-tight">
+                    {timeVal}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* Decorative Arabic Art SVG */}
-      <Image
-        src="/assets-svg/arabic-art-svgrepo-com.svg"
-        alt="arabic art"
-        width={80}
-        height={80}
-        className="absolute top-4 right-4 w-20 h-20 opacity-10 select-none pointer-events-none"
-        aria-hidden="true"
-        priority
-      />
-    </motion.div>
+      {/* Decorative Elements */}
+      <div className="absolute top-20 right-[-40px] opacity-[0.05] pointer-events-none">
+        <Image
+          src="/assets-svg/mun-mashhad-svgrepo-com.svg"
+          alt="art"
+          width={300}
+          height={300}
+          className={isNight ? "invert" : ""}
+        />
+      </div>
+
+      {/* Bottom Wave/Curve */}
+      <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
+        <svg
+          viewBox="0 0 1200 120"
+          preserveAspectRatio="none"
+          className="relative block w-full h-[60px]"
+        >
+          <path
+            d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C40.52,35.11,172.11,84.52,321.39,56.44Z"
+            className={isNight ? "fill-slate-900" : "fill-slate-50"}
+          ></path>
+        </svg>
+      </div>
+    </motion.section>
   );
 }

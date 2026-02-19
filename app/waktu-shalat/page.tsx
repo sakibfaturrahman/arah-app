@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import {
   ChevronLeft,
   MapPin,
@@ -140,20 +141,28 @@ export default function JadwalSholatBulanan() {
     });
   };
 
-  const handleShareWhatsApp = () => {
+  const handleShare = async () => {
     const appUrl = "https://nalarah.my.id/waktu-shalat";
-    const text =
-      `Assalamu'alaikum wr. wb. ✨\n\n` +
-      `Izin berbagi *Jadwal Sholat ${userCity}* untuk bulan *${namaBulan}* (${hijriDate}).\n\n` +
-      `Yuk, jaga waktu sholat tepat waktu dengan aplikasi *Arah*. Aplikasinya sangat ringan dan akurat!\n\n` +
-      `📍 *Lihat Jadwal Selengkapnya:* \n${appUrl}\n\n` +
-      `📱 *Tips:* Instal aplikasi ini di HP kamu dengan klik 'Add to Home Screen' di browser. Semoga bermanfaat! 🤲`;
 
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `Jadwal Sholat ${userCity}`,
+          text: `Jadwal Sholat ${userCity} untuk bulan ${namaBulan} (${hijriDate})`,
+          url: appUrl,
+        });
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(appUrl);
+        toast.success("Link berhasil dicopy ke clipboard!");
+      }
+    } catch (error) {
+      console.error("Share error:", error);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-40 pt-6 md:pt-28 font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] pb-40 pt-24 md:pt-28 font-sans overflow-x-hidden">
       {/* --- SCROLL HINT (MOBILE) --- */}
       <AnimatePresence>
         {showScrollHint && (
@@ -212,8 +221,8 @@ export default function JadwalSholatBulanan() {
               <span className="sm:hidden">PDF</span>
             </button>
             <button
-              onClick={handleShareWhatsApp}
-              className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-3.5 bg-[#25D366] rounded-2xl font-bold text-xs text-white hover:bg-[#128C7E] transition-all shadow-md shadow-green-100 active:scale-95"
+              onClick={handleShare}
+              className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-3.5 bg-[#5465ff] rounded-2xl font-bold text-xs text-white hover:bg-[#3d47cc] transition-all shadow-md shadow-blue-100 active:scale-95"
             >
               <Share2 className="w-4 h-4" />
               <span className="hidden sm:inline">Bagikan Jadwal</span>

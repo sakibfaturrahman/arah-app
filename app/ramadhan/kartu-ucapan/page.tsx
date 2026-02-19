@@ -33,7 +33,7 @@ export default function KartuUcapanPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] pt-6 md:pt-28 pb-20">
+    <div className="min-h-screen bg-[#FAFAFA] pt-24 md:pt-0 pb-20">
       <div className="max-w-5xl mx-auto px-4">
         {/* Header Navigasi */}
         <div className="flex items-center gap-4 mb-10">

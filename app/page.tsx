@@ -17,53 +17,41 @@ export default function Home() {
   }, []);
 
   const handleComplete = () => {
-    // 1. Simpan di storage
     localStorage.setItem("finished-onboarding", "true");
-
-    // 2. Beritahu layout untuk unlock Navbar/Footer
     window.dispatchEvent(new Event("onboarding-finished"));
-
-    // 3. Update state lokal untuk switch tampilan
     setShowWelcome(false);
   };
 
-  // Cegah Hydration Mismatch
   if (showWelcome === null) return null;
 
   return (
     <AnimatePresence mode="wait">
       {showWelcome ? (
-        <motion.div
-          key="onboarding-screen"
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.4 }}
-          className="fixed inset-0 z-[9999]"
-        >
+        <motion.div key="onboarding-screen" className="fixed inset-0 z-[9999]">
           <Onboarding onComplete={handleComplete} />
         </motion.div>
       ) : (
         <motion.div
           key="main-app-content"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          // PERBAIKAN: Tambahkan padding top di sini untuk memberi jarak dari Navbar
-          className="flex-grow pb-32 bg-[#fafafa] pt-18 md:pt-24"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col min-h-screen pb-32 bg-[#fafafa]"
         >
-          <div className="max-w-screen-md mx-auto px-4 md:px-6">
-            <div className="flex flex-col space-y-8">
-              {/* Greeting Section */}
-              <Greeting />
+          {/* 1. GREETING: Full Width */}
+          <section className="w-full bg-white mt-5">
+            <Greeting />
+          </section>
 
-              {/* Prayer & Info Section */}
-              <section className="w-full space-y-6">
+          {/* 2. KONTEN LAINNYA: Terpusat & Berjarak */}
+          <div className="w-full max-w-4xl mx-auto px-4 md:px-6">
+            <div className="flex flex-col space-y-10 mt-6">
+              {/* Prayer & Info */}
+              <div className="grid grid-cols-1 gap-6">
                 <HeroSection />
-                <PrayerTimeTable />
-              </section>
+              </div>
 
-              {/* Progress/History Section */}
-              <section className="w-full">
+              {/* Progress */}
+              <section>
                 <LastRead />
               </section>
             </div>

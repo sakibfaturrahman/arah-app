@@ -5,7 +5,6 @@ import {
   Clock,
   Volume2,
   VolumeX,
-  BellRing,
   Sparkles,
   Sunrise,
   Sun,
@@ -14,6 +13,7 @@ import {
   Moon,
   Coffee,
   AlertCircle,
+  ChevronRight,
 } from "lucide-react";
 import { getPrayerTimes, PRAYER_LIST } from "@/lib/getPrayerTimes";
 import { cn } from "@/lib/utils";
@@ -34,8 +34,6 @@ export default function PrayerTimeTable() {
   const [isMuted, setIsMuted] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
-
-  // State untuk melacak apakah browser mengizinkan audio
   const [isAudioAllowed, setIsAudioAllowed] = useState(true);
 
   const adzanRegularRef = useRef<HTMLAudioElement | null>(null);
@@ -43,8 +41,6 @@ export default function PrayerTimeTable() {
 
   useEffect(() => {
     setMounted(true);
-
-    // Inisialisasi Audio
     if (!adzanRegularRef.current)
       adzanRegularRef.current = new Audio("/adzan/adzan.mp3");
     if (!adzanSubuhRef.current)
@@ -66,20 +62,15 @@ export default function PrayerTimeTable() {
 
       if (timings) {
         checkActivePrayer(timings);
-        // Jalankan auto adzan hanya pada detik 00 agar tidak re-trigger dalam satu menit
-        if (now.getSeconds() === 0) {
-          handleAutoAdzan(timeStr, timings);
-        }
+        if (now.getSeconds() === 0) handleAutoAdzan(timeStr, timings);
       }
     }, 1000);
 
     return () => clearInterval(interval);
   }, [timings]);
 
-  // Fungsi untuk "memancing" izin autoplay dari browser
   const enableAudio = () => {
     setIsMuted(false);
-    // Memutar audio kosong/sejenak untuk membuka kunci audio browser
     adzanRegularRef.current
       ?.play()
       .then(() => {
@@ -91,25 +82,16 @@ export default function PrayerTimeTable() {
 
   const handleAutoAdzan = (timeStr: string, prayerTimings: any) => {
     if (isMuted) return;
-
     if (prayerTimings.Fajr === timeStr) {
-      adzanSubuhRef.current?.play().catch((err) => {
-        console.log("Autoplay diblokir browser:", err);
-        setIsAudioAllowed(false);
-      });
+      adzanSubuhRef.current?.play().catch(() => setIsAudioAllowed(false));
       return;
     }
-
     const otherPrayers = ["Dhuhr", "Asr", "Maghrib", "Isha"];
     if (otherPrayers.some((key) => prayerTimings[key] === timeStr)) {
-      adzanRegularRef.current?.play().catch((err) => {
-        console.log("Autoplay diblokir browser:", err);
-        setIsAudioAllowed(false);
-      });
+      adzanRegularRef.current?.play().catch(() => setIsAudioAllowed(false));
     }
   };
 
-  // ... (checkActivePrayer & getPrayerStatus tetap sama seperti kode Anda) ...
   const checkActivePrayer = (data: any) => {
     const now = new Date();
     const currentMins = now.getHours() * 60 + now.getMinutes();
@@ -131,155 +113,129 @@ export default function PrayerTimeTable() {
     setActivePrayer(currentActive);
   };
 
-  const getPrayerStatus = (prayerTime: string) => {
-    if (!prayerTime) return null;
-    const [h, m] = prayerTime.split(":").map(Number);
-    const prayerDate = new Date();
-    prayerDate.setHours(h, m, 0);
-    const diffInMs = currentTime.getTime() - prayerDate.getTime();
-    const diffInMins = Math.floor(diffInMs / 60000);
-    if (diffInMins === 0)
-      return {
-        label: "Sekarang",
-        color: "text-emerald-500 animate-pulse bg-emerald-50",
-      };
-    if (diffInMins > 0 && diffInMins < 60)
-      return {
-        label: `${diffInMins}m lalu`,
-        color: "text-amber-500 bg-amber-50",
-      };
-    return null;
-  };
-
   if (!mounted || !timings) return null;
 
   return (
-    <div className="w-full space-y-6 mt-5">
-      {/* Alert Jika Audio Belum Diizinkan */}
+    <div className="w-full max-w-5xl mx-auto space-y-4 px-4 py-6">
+      {/* Alert Audio - Lebih Ringkas */}
       <AnimatePresence>
         {!isAudioAllowed && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mx-4 md:mx-0 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between gap-3"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
           >
-            <div className="flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-500" />
-              <p className="text-xs font-medium text-amber-800">
-                Browser membatasi suara otomatis. Klik aktifkan untuk mendengar
-                Adzan.
-              </p>
+            <div className="flex items-center justify-between p-3 bg-amber-50 border border-amber-100 rounded-xl mb-4">
+              <div className="flex items-center gap-2 text-amber-800">
+                <AlertCircle className="w-4 h-4" />
+                <span className="text-[11px] font-medium">
+                  Klik untuk mengaktifkan suara Adzan otomatis
+                </span>
+              </div>
+              <button
+                onClick={enableAudio}
+                className="text-[10px] font-bold text-white bg-amber-500 px-3 py-1.5 rounded-lg shadow-sm"
+              >
+                AKTIFKAN
+              </button>
             </div>
-            <button
-              onClick={enableAudio}
-              className="px-4 py-2 bg-amber-500 text-white text-[10px] font-bold uppercase rounded-xl"
-            >
-              Aktifkan
-            </button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 md:px-0">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-[#5465ff]/10 rounded-2xl">
-            <Sparkles className="w-5 h-5 text-[#5465ff]" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 leading-none">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-[#5465ff]">
+            <Sparkles className="w-4 h-4" />
+            <span className="text-[10px] font-bold tracking-[0.2em] uppercase">
               Jadwal Shalat
-            </h2>
-            <p className="text-xs text-slate-400 mt-1 font-medium tracking-wide uppercase">
-              Waktu setempat
-            </p>
+            </span>
           </div>
+          <h2 className="text-2xl font-black text-slate-800 tracking-tight">
+            Waktu Ibadah
+          </h2>
         </div>
 
         <button
-          onClick={() => {
-            if (isMuted) enableAudio();
-            else setIsMuted(true);
-          }}
+          onClick={() => (isMuted ? enableAudio() : setIsMuted(true))}
           className={cn(
-            "flex items-center justify-center gap-2 px-6 py-3 rounded-2xl transition-all text-xs font-bold uppercase tracking-widest",
+            "group flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 text-[11px] font-bold border",
             isMuted
-              ? "bg-slate-100 text-slate-400 border border-slate-200"
-              : "bg-[#5465ff] text-white shadow-lg",
+              ? "bg-slate-50 text-slate-400 border-slate-200"
+              : "bg-white text-[#5465ff] border-[#5465ff]/20 shadow-sm hover:shadow-md",
           )}
         >
           {isMuted ? (
-            <VolumeX className="w-4 h-4" />
+            <VolumeX className="w-3.5 h-3.5" />
           ) : (
-            <Volume2 className="w-4 h-4" />
+            <Volume2 className="w-3.5 h-3.5 animate-bounce" />
           )}
-          {isMuted ? "Suara Adzan Mati" : "Suara Adzan Aktif"}
+          {isMuted ? "ADZAN NONAKTIF" : "ADZAN AKTIF"}
         </button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5 px-4 md:px-0">
+      {/* Grid Utama - Menggunakan Flex/Grid yang lebih rapat */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {PRAYER_LIST.map((prayer) => {
           const isActive = activePrayer === prayer.key;
-          const status = getPrayerStatus(timings[prayer.key]);
           const Icon = PRAYER_ICONS[prayer.key] || Clock;
+          const time = timings[prayer.key];
 
           return (
             <motion.div
               key={prayer.key}
-              animate={isActive ? { scale: 1.02 } : { scale: 1 }}
+              whileHover={{ y: -2 }}
               className={cn(
-                "relative group flex flex-col p-5 rounded-[2rem] border transition-all duration-500 overflow-hidden",
+                "relative flex items-center p-4 rounded-2xl border transition-all duration-300",
                 isActive
-                  ? "bg-white border-[#5465ff] shadow-xl"
-                  : "bg-white/40 backdrop-blur-sm border-slate-100",
+                  ? "bg-white border-[#5465ff] shadow-[0_10px_30px_-10px_rgba(84,101,255,0.3)] ring-1 ring-[#5465ff]/10"
+                  : "bg-slate-50/50 border-slate-100 hover:border-slate-200",
               )}
             >
-              <div className="flex items-start justify-between mb-6">
-                <div
-                  className={cn(
-                    "p-3 rounded-2xl",
-                    isActive
-                      ? "bg-[#5465ff] text-white"
-                      : "bg-slate-50 text-slate-400",
-                  )}
-                >
-                  <Icon
-                    className={cn("w-6 h-6", isActive && "animate-pulse")}
-                  />
-                </div>
-                {status && (
-                  <span
-                    className={cn(
-                      "text-[9px] font-bold uppercase tracking-tighter px-2 py-1 rounded-lg",
-                      status.color,
-                    )}
-                  >
-                    {status.label}
-                  </span>
+              <div
+                className={cn(
+                  "p-2.5 rounded-xl mr-4",
+                  isActive
+                    ? "bg-[#5465ff] text-white shadow-lg"
+                    : "bg-white text-slate-400 shadow-sm",
                 )}
+              >
+                <Icon className="w-5 h-5" />
               </div>
-              <div className="mt-auto space-y-1">
-                <h3
+
+              <div className="flex-1 min-w-0">
+                <p
                   className={cn(
-                    "text-[10px] font-bold uppercase tracking-[0.2em]",
+                    "text-[9px] font-black tracking-widest uppercase mb-0.5",
                     isActive ? "text-[#5465ff]" : "text-slate-400",
                   )}
                 >
                   {prayer.label}
-                </h3>
-                <div className="flex items-center gap-2">
+                </p>
+                <div className="flex items-baseline gap-1">
                   <span
                     className={cn(
-                      "text-3xl sm:text-4xl font-bold font-mono tracking-tighter",
+                      "text-xl font-bold font-mono tracking-tight",
                       isActive ? "text-slate-900" : "text-slate-600",
                     )}
                   >
-                    {timings[prayer.key]}
+                    {time}
                   </span>
                   {isActive && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#5465ff] animate-ping" />
+                    <span className="text-[10px] font-bold text-[#5465ff] animate-pulse ml-1">
+                      SEKARANG
+                    </span>
                   )}
                 </div>
               </div>
+
+              {isActive && (
+                <div className="ml-auto">
+                  <ChevronRight className="w-4 h-4 text-[#5465ff]/40" />
+                </div>
+              )}
             </motion.div>
           );
         })}
